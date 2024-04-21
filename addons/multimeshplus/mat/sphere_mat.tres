@@ -1,0 +1,8 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://d3ogk53yp2yvp"]
+
+[ext_resource type="Shader" path="res://addons/multimeshplus/mat/preview_sphere.gdshader" id="1_anccj"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_anccj")
+shader_parameter/color = Color(1, 0.701961, 0, 1)

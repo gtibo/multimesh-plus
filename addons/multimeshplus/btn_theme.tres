@@ -1,0 +1,38 @@
+[gd_resource type="Theme" load_steps=6 format=3 uid="uid://b2b40e68ae13p"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wtt7x"]
+content_margin_left = 2.0
+content_margin_top = 1.0
+content_margin_right = 2.0
+content_margin_bottom = 1.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_xbent"]
+content_margin_left = 2.0
+content_margin_top = 1.0
+content_margin_right = 2.0
+content_margin_bottom = 1.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_edg8i"]
+content_margin_left = 2.0
+content_margin_top = 1.0
+content_margin_right = 2.0
+content_margin_bottom = 1.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_y5i7w"]
+content_margin_left = 2.0
+content_margin_top = 1.0
+content_margin_right = 2.0
+content_margin_bottom = 1.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_miv63"]
+content_margin_left = 2.0
+content_margin_top = 1.0
+content_margin_right = 2.0
+content_margin_bottom = 1.0
+
+[resource]
+Button/styles/disabled = SubResource("StyleBoxEmpty_wtt7x")
+Button/styles/focus = SubResource("StyleBoxEmpty_xbent")
+Button/styles/hover = SubResource("StyleBoxEmpty_edg8i")
+Button/styles/normal = SubResource("StyleBoxEmpty_y5i7w")
+Button/styles/pressed = SubResource("StyleBoxEmpty_miv63")
