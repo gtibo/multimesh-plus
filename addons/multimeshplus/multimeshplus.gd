@@ -6,7 +6,7 @@ var selected_node : MultiMeshInstance3D
 
 var button_group : ButtonGroup = ButtonGroup.new()
 
-enum MODE {NONE, ADD, ERASE, SCALE, COLOR}
+enum MODE {NONE, PAINT, SCALE, COLOR}
 var current_mode : MODE = MODE.NONE
 
 var transforms : Array[Transform3D] = []
@@ -112,8 +112,7 @@ func _enter_tree():
 	
 	# Add modes
 	var btn_types = [
-		{"ID": MODE.ADD, "title": "Add", "icon": "Paint"},
-		{"ID": MODE.ERASE, "title": "Erase", "icon": "Eraser"},
+		{"ID": MODE.PAINT, "title": "Paint", "icon": "Paint"},
 		{"ID": MODE.SCALE, "title": "Scale", "icon": "ToolScale"},
 		{"ID": MODE.COLOR, "title": "Colorize", "icon": "Bucket"},
 	]
@@ -166,8 +165,7 @@ func _on_button_group_press(_pressed_button : BaseButton):
 
 func _update_threshold_side():
 	match current_mode:
-		MODE.ADD: set_preview_scale(threshold)
-		MODE.ERASE: set_preview_scale(threshold)
+		MODE.PAINT: set_preview_scale(threshold)
 		MODE.SCALE: set_preview_scale(scale_threshold)
 		MODE.COLOR: set_preview_scale(scale_threshold)
 
@@ -235,47 +233,59 @@ func _check_paint_logic(viewport_camera, event):
 	if event.button_mask != MOUSE_BUTTON_LEFT: return
 	
 	match current_mode:
-		MODE.ADD:
-			if _is_inside_last_transform_threshold(t): return
-			t = t.scaled_local(Vector3.ONE * base_scale)
-			t = t.rotated_local(Vector3.UP, randf() * TAU)
-			transforms.append(t)
-			colors.append(Color(randf(), randf(), randf()))
+		MODE.PAINT:
+			_apply_paint_mode(event, t)
+		MODE.SCALE:
+			_apply_transform_mode(event, t)
+		MODE.COLOR:
+			_apply_color_mode(t)
+
+func _apply_paint_mode(event : InputEventMouse, t : Transform3D):
+	if event.shift_pressed:
+		# Erase
+		if transforms.is_empty(): return
+		if _is_inside_last_transform_threshold(t): return
+		var closest_idx = _get_closest_transform_from(t, threshold)
+		if closest_idx != -1:
+			transforms.remove_at(closest_idx)
+			colors.remove_at(closest_idx)
 			last_transform_operation = t
 			_update_transforms()
-		MODE.ERASE:
-			if transforms.is_empty(): return
-			if _is_inside_last_transform_threshold(t): return
-			var closest_idx = _get_closest_transform_from(t, threshold)
-			if closest_idx != -1:
-				transforms.remove_at(closest_idx)
-				colors.remove_at(closest_idx)
-				last_transform_operation = t
-				_update_transforms()
-		MODE.SCALE:
-			for idx in transforms.size():
-				var dist = transforms[idx].origin.distance_to(t.origin)
-				if dist > scale_threshold: continue
-				var percent : float = (1.0 - clamp(dist / scale_threshold, 0.0, 1.0))
-				var current_scale = transforms[idx].basis.get_scale()[0]
-				if event.shift_pressed:
-					current_scale -= percent * 0.025
-				elif event.ctrl_pressed:
-					current_scale = lerpf(current_scale, base_scale, percent * 0.025)
-				else:
-					current_scale += percent * 0.025
-				current_scale = max(0.1, current_scale)
-				transforms[idx].basis = Basis(transforms[idx].basis.get_rotation_quaternion()).scaled(Vector3.ONE * current_scale)
-			_update_transforms()
-		MODE.COLOR:
-			for idx in transforms.size():
-				var dist = transforms[idx].origin.distance_to(t.origin)
-				if dist > scale_threshold: continue
-				var percent : float = (1.0 - clamp(dist / scale_threshold, 0.0, 1.0))
-				if !ignore_r: colors[idx].r = randf() if randomize_r else lerpf(colors[idx].r, base_color.r, percent)
-				if !ignore_g: colors[idx].g = randf() if randomize_g else lerpf(colors[idx].g, base_color.g, percent)
-				if !ignore_b: colors[idx].b = randf() if randomize_b else lerpf(colors[idx].b, base_color.b, percent)
-			_update_transforms()
+	else:
+		# Add
+		if _is_inside_last_transform_threshold(t): return
+		t = t.scaled_local(Vector3.ONE * base_scale)
+		t = t.rotated_local(Vector3.UP, randf() * TAU)
+		transforms.append(t)
+		colors.append(Color(randf(), randf(), randf()))
+		last_transform_operation = t
+		_update_transforms()
+
+func _apply_transform_mode(event : InputEventMouse, t : Transform3D):
+	for idx in transforms.size():
+		var dist = transforms[idx].origin.distance_to(t.origin)
+		if dist > scale_threshold: continue
+		var percent : float = (1.0 - clamp(dist / scale_threshold, 0.0, 1.0))
+		var current_scale = transforms[idx].basis.get_scale()[0]
+		if event.shift_pressed:
+			current_scale -= percent * 0.025
+		elif event.ctrl_pressed:
+			current_scale = lerpf(current_scale, base_scale, percent * 0.025)
+		else:
+			current_scale += percent * 0.025
+		current_scale = max(0.1, current_scale)
+		transforms[idx].basis = Basis(transforms[idx].basis.get_rotation_quaternion()).scaled(Vector3.ONE * current_scale)
+	_update_transforms()
+
+func _apply_color_mode(t : Transform3D):
+	for idx in transforms.size():
+		var dist = transforms[idx].origin.distance_to(t.origin)
+		if dist > scale_threshold: continue
+		var percent : float = (1.0 - clamp(dist / scale_threshold, 0.0, 1.0))
+		if !ignore_r: colors[idx].r = randf() if randomize_r else lerpf(colors[idx].r, base_color.r, percent)
+		if !ignore_g: colors[idx].g = randf() if randomize_g else lerpf(colors[idx].g, base_color.g, percent)
+		if !ignore_b: colors[idx].b = randf() if randomize_b else lerpf(colors[idx].b, base_color.b, percent)
+	_update_transforms()
 
 func _is_inside_last_transform_threshold(t : Transform3D) -> bool:
 	if !last_transform_operation: return false
