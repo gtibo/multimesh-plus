@@ -10,7 +10,10 @@ enum MODE {NONE, ADD, ERASE, SCALE, COLOR}
 var current_mode : MODE = MODE.NONE
 
 var transforms : Array[Transform3D] = []
+var _last_tranforms : Array[Transform3D]
 var colors : Array[Color] = []
+var _last_colors : Array[Color] = []
+
 var last_transform_operation
 
 var threshold : float = 2.0
@@ -179,11 +182,39 @@ func _forward_3d_gui_input(viewport_camera, event):
 	if !is_left_click: return EditorPlugin.AFTER_GUI_INPUT_PASS
 	return EditorPlugin.AFTER_GUI_INPUT_STOP
 
+func _check_history():
+	var undo_redo = get_undo_redo()
+	var color_diff = _last_colors != colors
+	# Check for transforms differences
+	if _last_tranforms != transforms:
+		undo_redo.create_action("Edit Multimesh")
+		undo_redo.add_do_property(self, "transforms", transforms.duplicate())
+		undo_redo.add_undo_property(self, "transforms", _last_tranforms)
+		if color_diff:
+			undo_redo.add_do_property(self, "colors", colors)
+			undo_redo.add_undo_property(self, "colors", _last_colors)
+		undo_redo.add_do_method(self, "_update_transforms")
+		undo_redo.add_undo_method(self, "_update_transforms")
+		undo_redo.commit_action()
+	# Check for color differences
+	elif color_diff:
+		undo_redo.create_action("Edit colors")
+		undo_redo.add_do_property(self, "colors", colors.duplicate())
+		undo_redo.add_undo_property(self, "colors", _last_colors)
+		undo_redo.add_do_method(self, "_update_transforms")
+		undo_redo.add_undo_method(self, "_update_transforms")
+		undo_redo.commit_action()
+
 func _check_paint_logic(viewport_camera, event):
 	if !event is InputEventMouse: return
 	
-	if event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT && !event.pressed:
-		last_transform_operation = null
+	if event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_last_tranforms = transforms.duplicate()
+			_last_colors = colors.duplicate()
+		else:
+			last_transform_operation = null
+			_check_history()
 	
 	var space_state : PhysicsDirectSpaceState3D = viewport_camera.get_world_3d().direct_space_state
 	var query = PhysicsRayQueryParameters3D.create(
@@ -279,8 +310,9 @@ func _reset_transforms():
 		colors[idx] = selected_node.multimesh.get_instance_color(idx)
 
 func _update_transforms():
-	selected_node.multimesh.instance_count = transforms.size()
-	for idx in transforms.size():
+	var count = transforms.size()
+	selected_node.multimesh.instance_count = count
+	for idx in count:
 		selected_node.multimesh.set_instance_transform(idx, transforms[idx])
 		selected_node.multimesh.set_instance_color(idx, colors[idx])
 
