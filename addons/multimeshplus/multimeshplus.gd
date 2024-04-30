@@ -193,7 +193,7 @@ func _check_history():
 			undo_redo.add_undo_property(self, "colors", _last_colors)
 		undo_redo.add_do_method(self, "_update_transforms")
 		undo_redo.add_undo_method(self, "_update_transforms")
-		undo_redo.commit_action()
+		undo_redo.commit_action(false)
 	# Check for color differences
 	elif color_diff:
 		undo_redo.create_action("Edit colors")
@@ -201,7 +201,7 @@ func _check_history():
 		undo_redo.add_undo_property(self, "colors", _last_colors)
 		undo_redo.add_do_method(self, "_update_transforms")
 		undo_redo.add_undo_method(self, "_update_transforms")
-		undo_redo.commit_action()
+		undo_redo.commit_action(false)
 
 func _check_paint_logic(viewport_camera, event):
 	if !event is InputEventMouse: return
