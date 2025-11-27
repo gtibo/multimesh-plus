@@ -12,12 +12,23 @@ config_version=5
 
 config/name="Multimesh Plus"
 run/main_scene="res://main.tscn"
-config/features=PackedStringArray("4.2", "Forward Plus")
+config/features=PackedStringArray("4.5", "Forward Plus")
+run/max_fps=60
 config/icon="res://icon.svg"
+
+[debug]
+
+gdscript/warnings/untyped_declaration=1
+gdscript/warnings/inferred_declaration=1
+
+[editor]
+
+movie_writer/movie_file="/home/tibo/Vidéos/recording.avi"
+movie_writer/mjpeg_quality=1.0
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/multimeshplus/plugin.cfg")
+enabled=PackedStringArray("res://addons/mmpluseditor/plugin.cfg")
 
 [rendering]
 

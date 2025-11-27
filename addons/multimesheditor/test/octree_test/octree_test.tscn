@@ -1,0 +1,55 @@
+[gd_scene load_steps=8 format=3 uid="uid://c2oaxmwlic2rc"]
+
+[ext_resource type="Texture2D" uid="uid://di6ch8bkg32l2" path="res://assets/checkerboard.png" id="2_s7u2m"]
+[ext_resource type="Script" uid="uid://be4lu3ug8donp" path="res://addons/multimesheditor/mm_plus/mm_plus_3d.gd" id="2_u2sx3"]
+
+[sub_resource type="Environment" id="Environment_u2sx3"]
+background_mode = 1
+background_color = Color(0.552941, 0.552941, 0.552941, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.690196, 0.690196, 0.690196, 1)
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_u2sx3"]
+radius = 8.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sx5wx"]
+albedo_color = Color(0.8, 0.8, 0.8, 1)
+albedo_texture = ExtResource("2_s7u2m")
+uv1_scale = Vector3(0.25, 0.25, 0.25)
+uv1_triplanar = true
+uv1_triplanar_sharpness = 10.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_s7u2m"]
+radius = 8.0
+height = 16.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_u2sx3"]
+size = Vector3(0.5, 0.5, 0.5)
+
+[node name="OctreeTest" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_u2sx3")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("SphereShape3D_u2sx3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D"]
+material_override = SubResource("StandardMaterial3D_sx5wx")
+mesh = SubResource("SphereMesh_s7u2m")
+skeleton = NodePath("../..")
+
+[node name="MmPlus3D" type="Node3D" parent="."]
+script = ExtResource("2_u2sx3")
+mesh = SubResource("BoxMesh_u2sx3")
+metadata/_custom_type_script = "uid://be4lu3ug8donp"
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707107, -0.612372, 0.353554, 0, 0.5, 0.866025, -0.707107, -0.612372, 0.353554, 0, 0, 0)
+shadow_enabled = true
+directional_shadow_max_distance = 30.0

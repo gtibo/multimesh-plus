@@ -1,0 +1,8 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://0sl2xa38rhtl"]
+
+[ext_resource type="Shader" uid="uid://4luoq4nq7g86" path="res://addons/multimesheditor/test/octree_test/wireframe.gdshader" id="1_dsqdi"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_dsqdi")
+shader_parameter/albedo = Color(0.32, 0.558, 1, 1)
