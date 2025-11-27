@@ -22,16 +22,17 @@ class IdPosList:
 
 var region_map : Dictionary[AABB, IdPosList] = {}
 
-func add_point(idx : int, point : Vector3) -> AABB:
+func check_region_for_point(point : Vector3) -> AABB:
 	var center : Vector3 = (point / grid_size).floor() * grid_size + half_grid_size
 	var region : AABB = AABB(center - half_grid_size, grid_size)
 
 	if !region_map.has(region):
 		region_map[region] = IdPosList.new()
 
-	region_map[region].add(idx, point)
-
 	return region
+
+func add_point_in_region(region : AABB, idx : int, point : Vector3) -> void:
+	region_map[region].add(idx, point)
 
 func is_point_in_sphere(position : Vector3, radius : float = 1.0) -> bool:
 	for aabb in region_map.keys():
@@ -47,23 +48,25 @@ func is_point_in_sphere(position : Vector3, radius : float = 1.0) -> bool:
 func get_points_in_sphere(position : Vector3, radius : float = 1.0):
 	pass
 
-func remove_points_in_sphere(position : Vector3, radius : float = 1.0) -> Array[int]:
-	var result : Array[int] = []
+func remove_points_in_sphere(position : Vector3, radius : float = 1.0) -> Dictionary[AABB, PackedInt64Array]:
+	var result : Dictionary[AABB, PackedInt64Array] = {}
 
 	for aabb in region_map.keys():
 		aabb = aabb as AABB
 		if !aabb_overlap_with_sphere(aabb, position, radius): continue
 		var id_pos_list : IdPosList = region_map[aabb]
+		result[aabb] = PackedInt64Array()
 		for i in id_pos_list.count:
 			var point : Vector3 = id_pos_list.position_list[i]
 			if point.distance_to(position) < radius:
-				result.append(id_pos_list.idx_list[i])
-	result.sort()
+				result[aabb].append(id_pos_list.idx_list[i])
+		result[aabb].sort()
 
-	for r in range(result.size() -1, -1, -1):
-		var deleted_idx : int = result[r]
-		for aabb in region_map.keys():
-			var id_pos_list : IdPosList = region_map[aabb]
+
+	for aabb in result:
+		var id_pos_list : IdPosList = region_map[aabb]
+		for r in range(result[aabb].size() -1, -1, -1):
+			var deleted_idx : int = result[aabb][r]
 			for i in range(id_pos_list.count -1, -1, -1):
 				var other_idx : int = id_pos_list.idx_list[i]
 				if other_idx > deleted_idx:

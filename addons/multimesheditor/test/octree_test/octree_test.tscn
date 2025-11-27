@@ -1,6 +1,6 @@
-[gd_scene load_steps=9 format=3 uid="uid://c2oaxmwlic2rc"]
+[gd_scene load_steps=10 format=3 uid="uid://c2oaxmwlic2rc"]
 
-[ext_resource type="Texture2D" uid="uid://di6ch8bkg32l2" path="res://assets/checkerboard.png" id="2_s7u2m"]
+[ext_resource type="Material" uid="uid://c1kohdpddpx58" path="res://assets/grid_mat.tres" id="2_s7u2m"]
 [ext_resource type="Script" uid="uid://be4lu3ug8donp" path="res://addons/multimesheditor/mm_plus/mm_plus_3d.gd" id="2_u2sx3"]
 
 [sub_resource type="Environment" id="Environment_u2sx3"]
@@ -11,49 +11,126 @@ ambient_light_color = Color(0.690196, 0.690196, 0.690196, 1)
 tonemap_mode = 2
 glow_enabled = true
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u2sx3"]
+vertex_color_use_as_albedo = true
+vertex_color_is_srgb = true
+
+[sub_resource type="BoxMesh" id="BoxMesh_u2sx3"]
+material = SubResource("StandardMaterial3D_u2sx3")
+
+[sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_s7u2m"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_sx5wx"]
+size = Vector2(400, 400)
+
 [sub_resource type="SphereShape3D" id="SphereShape3D_u2sx3"]
 radius = 8.0
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sx5wx"]
-albedo_color = Color(0.8, 0.8, 0.8, 1)
-albedo_texture = ExtResource("2_s7u2m")
-uv1_scale = Vector3(0.25, 0.25, 0.25)
-uv1_triplanar = true
-uv1_triplanar_sharpness = 10.0
 
 [sub_resource type="SphereMesh" id="SphereMesh_s7u2m"]
 radius = 8.0
 height = 16.0
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u2sx3"]
-albedo_color = Color(1, 0.77066666, 0.13999999, 1)
-
-[sub_resource type="BoxMesh" id="BoxMesh_u2sx3"]
-material = SubResource("StandardMaterial3D_u2sx3")
-size = Vector3(0.5, 0.5, 0.5)
 
 [node name="OctreeTest" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_u2sx3")
 
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.7071068, -0.61237234, 0.35355362, 0, 0.5000003, 0.86602527, -0.7071068, -0.61237234, 0.35355362, 0, 0, 0)
+shadow_enabled = true
+directional_shadow_max_distance = 30.0
+
+[node name="MmPlus3D" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 0)
+script = ExtResource("2_u2sx3")
+mesh = SubResource("BoxMesh_u2sx3")
+multimesh_RID_map = Dictionary[AABB, RID]({
+AABB(0, 0, 40, 20, 20, 20): RID(1998504117403725),
+AABB(20, 0, 40, 20, 20, 20): RID(1998680211062862),
+AABB(40, -20, 20, 20, 20, 20): RID(1999513434718287),
+AABB(40, 0, 40, 20, 20, 20): RID(1999814082429008),
+AABB(20, -20, -20, 20, 20, 20): RID(2045899081515089),
+AABB(0, -20, -20, 20, 20, 20): RID(2060308696793170),
+AABB(0, -20, -40, 20, 20, 20): RID(2060506265288787),
+AABB(-20, -20, -40, 20, 20, 20): RID(2066618003750996),
+AABB(-20, -20, -20, 20, 20, 20): RID(2067253658910805),
+AABB(0, 0, 140, 20, 20, 20): RID(2105878299803734),
+AABB(0, -20, 140, 20, 20, 20): RID(2106634214047831),
+AABB(0, 0, 120, 20, 20, 20): RID(2107665006198872),
+AABB(0, -20, 120, 20, 20, 20): RID(2107690776002649),
+AABB(0, 0, 160, 20, 20, 20): RID(2211487250645082),
+AABB(20, 0, 140, 20, 20, 20): RID(2211886682603611),
+AABB(20, 0, 160, 20, 20, 20): RID(2282543189590108),
+AABB(40, 0, 160, 20, 20, 20): RID(2452052663861357),
+AABB(40, 0, 140, 20, 20, 20): RID(2450480705831020),
+AABB(60, 0, 120, 20, 20, 20): RID(2450381921583211),
+AABB(40, 0, 120, 20, 20, 20): RID(2448827143422058),
+AABB(40, 0, 100, 20, 20, 20): RID(2448668229632105),
+AABB(20, 0, 80, 20, 20, 20): RID(2447877955649640),
+AABB(0, 0, 80, 20, 20, 20): RID(2447611667677287),
+AABB(-20, 0, 80, 20, 20, 20): RID(2447547243167846),
+AABB(20, 0, 100, 20, 20, 20): RID(2446696839643237),
+AABB(0, 0, 100, 20, 20, 20): RID(2446546515787876),
+AABB(-20, 0, 100, 20, 20, 20): RID(2446477796311139),
+AABB(-20, 0, 120, 20, 20, 20): RID(2446198623436898),
+AABB(20, -20, 120, 20, 20, 20): RID(2300139670601825),
+AABB(20, 0, 120, 20, 20, 20): RID(2298980029431904),
+AABB(20, -20, 140, 20, 20, 20): RID(2298580597473375),
+AABB(-20, 0, 140, 20, 20, 20): RID(2298490403160158),
+AABB(20, -20, 160, 20, 20, 20): RID(2298232705122397),
+AABB(0, 0, -20, 20, 20, 20): RID(1647850102456364),
+AABB(0, 0, 0, 20, 20, 20): RID(1647871577292845),
+AABB(-20, 0, -20, 20, 20, 20): RID(1648232354545710),
+AABB(-20, 0, 0, 20, 20, 20): RID(1652862329290799),
+AABB(-40, 0, 0, 20, 20, 20): RID(1693076108083248),
+AABB(-20, 0, 20, 20, 20, 20): RID(1693346691022897),
+AABB(0, 0, 20, 20, 20, 20): RID(1693411115532338),
+AABB(20, 0, 0, 20, 20, 20): RID(1693625863897139),
+AABB(-40, 0, -20, 20, 20, 20): RID(1694892879249460),
+AABB(-40, 0, -40, 20, 20, 20): RID(1694905764151349),
+AABB(0, 0, -40, 20, 20, 20): RID(1694970188660790),
+AABB(-20, 0, -40, 20, 20, 20): RID(1694987368529975),
+AABB(-60, 0, -20, 20, 20, 20): RID(1695442635063352),
+AABB(-60, 0, 0, 20, 20, 20): RID(1695476994801721),
+AABB(-40, 0, 20, 20, 20, 20): RID(1695610138787898),
+AABB(20, 0, 20, 20, 20, 20): RID(1695945146236987),
+AABB(40, 0, 20, 20, 20, 20): RID(1989772448890956),
+AABB(20, -20, 20, 20, 20, 20): RID(1989699434446923),
+AABB(-60, -20, 0, 20, 20, 20): RID(1952659636486218),
+AABB(-40, -20, 20, 20, 20, 20): RID(1933358053457993),
+AABB(-20, -20, 20, 20, 20, 20): RID(1933070290649160),
+AABB(0, -20, 20, 20, 20, 20): RID(1931983663923271),
+AABB(60, 0, 0, 20, 20, 20): RID(1801085945643078),
+AABB(60, 0, -20, 20, 20, 20): RID(1800858312376389),
+AABB(-60, 0, 20, 20, 20, 20): RID(1791426564194372),
+AABB(20, -20, 0, 20, 20, 20): RID(1785568228802627),
+AABB(0, -20, 0, 20, 20, 20): RID(1785452264685634),
+AABB(-20, -20, 0, 20, 20, 20): RID(1785143027040321),
+AABB(-40, -20, 0, 20, 20, 20): RID(1785005588086848),
+AABB(20, 0, -40, 20, 20, 20): RID(1696434772508735),
+AABB(40, 0, -20, 20, 20, 20): RID(1696284448653374),
+AABB(40, 0, 0, 20, 20, 20): RID(1696245793947709),
+AABB(20, 0, -20, 20, 20, 20): RID(1696224319111228)
+})
+metadata/_custom_type_script = "uid://be4lu3ug8donp"
+
+[node name="StaticBody3D2" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D2"]
+shape = SubResource("WorldBoundaryShape3D_s7u2m")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D2"]
+material_override = ExtResource("2_s7u2m")
+mesh = SubResource("PlaneMesh_sx5wx")
+skeleton = NodePath("../..")
+
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
 shape = SubResource("SphereShape3D_u2sx3")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D"]
-material_override = SubResource("StandardMaterial3D_sx5wx")
+material_override = ExtResource("2_s7u2m")
 mesh = SubResource("SphereMesh_s7u2m")
 skeleton = NodePath("../..")
-
-[node name="MmPlus3D" type="Node3D" parent="."]
-script = ExtResource("2_u2sx3")
-mesh = SubResource("BoxMesh_u2sx3")
-metadata/_custom_type_script = "uid://be4lu3ug8donp"
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.707107, -0.612372, 0.353554, 0, 0.5, 0.866025, -0.707107, -0.612372, 0.353554, 0, 0, 0)
-shadow_enabled = true
-directional_shadow_max_distance = 30.0

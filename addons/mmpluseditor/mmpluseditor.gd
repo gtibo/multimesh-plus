@@ -4,6 +4,7 @@ extends EditorPlugin
 var selected_node : MmPlus3D
 var octree : Octree
 var buffer : PackedFloat32Array = []
+var buffer_map : Dictionary[AABB, PackedFloat32Array] = {}
 
 func _enable_plugin() -> void:
 	# Add autoloads here.
@@ -25,10 +26,13 @@ func _handles(object : Object) -> bool:
 	return object is MmPlus3D
 
 func _edit(object) -> void:
+	var previous_selected_node : MmPlus3D = selected_node
 	selected_node = object
 	if selected_node:
 		buffer = []
+		buffer_map = {}
 		octree = Octree.new()
+		selected_node.multimesh_RID_map = {}
 
 func _forward_3d_gui_input(viewport_camera, event) -> int:
 	var mouse_event : InputEventMouse = event as InputEventMouse
@@ -50,24 +54,25 @@ func _check_paint_logic(viewport_camera, event) -> void:
 		viewport_camera.global_position,
 		viewport_camera.global_position + viewport_camera.project_ray_normal(event.position) * 100.0
 		)
-	var result = space_state.intersect_ray(query)
-	if !result: return
+	var ray_cast_result = space_state.intersect_ray(query)
+	if !ray_cast_result: return
 
-	var t : Transform3D = Transform3D(_get_basis_from_normal(result.normal), result.position)
+	var t : Transform3D = Transform3D(_get_basis_from_normal(ray_cast_result.normal), ray_cast_result.position)
 
 	if event.shift_pressed:
 		# Erase
-		var idx_list : Array[int] = octree.remove_points_in_sphere(t.origin, 2.0)
-		_remove_from_buffer_at_idx_list(idx_list)
-		_update_selected_node_buffer()
+		var result : Dictionary[AABB, PackedInt64Array] = octree.remove_points_in_sphere(t.origin, 10.0)
+		for aabb in result:
+			_remove_from_buffer_at_idx_list(aabb, result[aabb])
+		_update_selected_node_buffers()
 	else:
-		for i in range(8):
+		for i in range(16):
 			# Paint
-			var offset : Vector2 = _random_in_circle(2.0)
+			var offset : Vector2 = _random_in_circle(10.0)
 			var target = t.translated_local(Vector3(offset.x, 0.0, offset.y))
 			if octree.is_point_in_sphere(target.origin, 1.0): continue
 			_add_transform_to_buffer(target)
-			_update_selected_node_buffer()
+			_update_selected_node_buffers()
 
 
 func _random_in_circle(radius : float = 1.0) -> Vector2:
@@ -76,22 +81,30 @@ func _random_in_circle(radius : float = 1.0) -> Vector2:
 	return Vector2.from_angle(theta) * r
 
 func _add_transform_to_buffer(t : Transform3D) -> void:
-	buffer.append_array([t.basis.x.x, t.basis.y.x, t.basis.z.x, t.origin.x, t.basis.x.y, t.basis.y.y, t.basis.z.y, t.origin.y, t.basis.x.z, t.basis.y.z, t.basis.z.z, t.origin.z])
-	var idx : int = buffer.size() / 12 - 1
-	var region : AABB = octree.add_point(idx, t.origin)
+	var region : AABB = octree.check_region_for_point(t.origin)
 
-func _remove_from_buffer_at_idx_list(idx_list : Array[int]):
+	if !buffer_map.has(region):
+		buffer_map[region] = PackedFloat32Array()
+
+	buffer_map[region].append_array(
+		[t.basis.x.x, t.basis.y.x, t.basis.z.x, t.origin.x, t.basis.x.y, t.basis.y.y, t.basis.z.y, t.origin.y, t.basis.x.z, t.basis.y.z, t.basis.z.z, t.origin.z, randf(), randf(), randf(), 1.0]
+		)
+	var idx : int = buffer_map[region].size() / 16 - 1
+
+	octree.add_point_in_region(region, idx, t.origin)
+
+func _remove_from_buffer_at_idx_list(aabb : AABB, idx_list : PackedInt64Array):
 	for idx in range(idx_list.size() - 1 , -1, -1):
-		_remove_from_buffer_at_idx(idx_list[idx])
+		_remove_from_buffer_at_idx(aabb, idx_list[idx])
 
-func _remove_from_buffer_at_idx(idx : int):
-	var size : int = 12
+func _remove_from_buffer_at_idx(aabb : AABB, idx : int):
+	var size : int = 16
 	var idx_offset : int = size * idx
-	for i in range(size - 1  + idx_offset, -1 + idx_offset, -1):
-		buffer.remove_at(i)
+	for i in range(size - 1 + idx_offset, -1 + idx_offset, -1):
+		buffer_map[aabb].remove_at(i)
 
-func _update_selected_node_buffer() -> void:
-	selected_node._update_buffer(buffer)
+func _update_selected_node_buffers() -> void:
+	selected_node._update_buffer(buffer_map)
 
 func _get_basis_from_normal(normal : Vector3) -> Basis:
 	var basis = Basis.IDENTITY
