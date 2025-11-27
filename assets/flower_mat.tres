@@ -1,6 +1,6 @@
 [gd_resource type="ShaderMaterial" load_steps=6 format=3 uid="uid://cojhtxb1xrv4a"]
 
-[ext_resource type="Shader" path="res://assets/waving_mesh.gdshader" id="1_g7y43"]
+[ext_resource type="Shader" uid="uid://gcfpa4gmgfp3" path="res://assets/waving_mesh.gdshader" id="1_g7y43"]
 [ext_resource type="Texture2D" uid="uid://cm4yel55b7rrd" path="res://assets/flower_color.tres" id="2_61hpw"]
 
 [sub_resource type="Gradient" id="Gradient_5xt6t"]
@@ -9,15 +9,15 @@
 fractal_octaves = 2
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_yoy7t"]
-seamless = true
-color_ramp = SubResource("Gradient_5xt6t")
 noise = SubResource("FastNoiseLite_hwnmh")
+color_ramp = SubResource("Gradient_5xt6t")
+seamless = true
 
 [resource]
 render_priority = 0
 shader = ExtResource("1_g7y43")
+shader_parameter/wind_sampler = SubResource("NoiseTexture2D_yoy7t")
+shader_parameter/albedo_sampler = ExtResource("2_61hpw")
 shader_parameter/intensity = 0.3
 shader_parameter/waviness = 1.0
 shader_parameter/wind_speed = 0.05
-shader_parameter/wind_sampler = SubResource("NoiseTexture2D_yoy7t")
-shader_parameter/albedo_sampler = ExtResource("2_61hpw")

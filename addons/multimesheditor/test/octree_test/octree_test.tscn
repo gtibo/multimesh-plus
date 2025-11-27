@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://c2oaxmwlic2rc"]
+[gd_scene load_steps=9 format=3 uid="uid://c2oaxmwlic2rc"]
 
 [ext_resource type="Texture2D" uid="uid://di6ch8bkg32l2" path="res://assets/checkerboard.png" id="2_s7u2m"]
 [ext_resource type="Script" uid="uid://be4lu3ug8donp" path="res://addons/multimesheditor/mm_plus/mm_plus_3d.gd" id="2_u2sx3"]
@@ -25,7 +25,11 @@ uv1_triplanar_sharpness = 10.0
 radius = 8.0
 height = 16.0
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u2sx3"]
+albedo_color = Color(1, 0.77066666, 0.13999999, 1)
+
 [sub_resource type="BoxMesh" id="BoxMesh_u2sx3"]
+material = SubResource("StandardMaterial3D_u2sx3")
 size = Vector3(0.5, 0.5, 0.5)
 
 [node name="OctreeTest" type="Node3D"]
