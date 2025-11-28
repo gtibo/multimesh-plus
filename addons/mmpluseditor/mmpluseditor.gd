@@ -3,7 +3,6 @@ extends EditorPlugin
 
 var selected_node : MmPlus3D
 var octree : Octree
-var buffer : PackedFloat32Array = []
 var buffer_map : Dictionary[AABB, PackedFloat32Array] = {}
 
 func _enable_plugin() -> void:
@@ -29,10 +28,28 @@ func _edit(object) -> void:
 	var previous_selected_node : MmPlus3D = selected_node
 	selected_node = object
 	if selected_node:
-		buffer = []
 		buffer_map = {}
 		octree = Octree.new()
-		selected_node.multimesh_RID_map = {}
+		_load_selected_node_data()
+
+func _load_selected_node_data() -> void:
+	var data : Dictionary[AABB, MultiMesh] = selected_node.multimesh_data_map
+	
+	for aabb in data:
+		buffer_map[aabb] = data[aabb].buffer
+		var buffer : PackedFloat32Array = data[aabb].buffer
+
+		var points = []
+
+		for idx in range(0, buffer.size(), 16):
+			var point = Vector3(
+				buffer[idx + 3],
+				buffer[idx + 7],
+				buffer[idx + 11]
+			)
+			points.append(point)
+
+		octree.populate(aabb, points)
 
 func _forward_3d_gui_input(viewport_camera, event) -> int:
 	var mouse_event : InputEventMouse = event as InputEventMouse

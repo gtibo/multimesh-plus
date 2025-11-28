@@ -22,6 +22,12 @@ class IdPosList:
 
 var region_map : Dictionary[AABB, IdPosList] = {}
 
+func populate(aabb : AABB, points : PackedVector3Array) -> void:
+	var id_pos_list : IdPosList = IdPosList.new()
+	for idx in points.size():
+		id_pos_list.add(idx, points[idx])
+	region_map[aabb] = id_pos_list
+
 func check_region_for_point(point : Vector3) -> AABB:
 	var center : Vector3 = (point / grid_size).floor() * grid_size + half_grid_size
 	var region : AABB = AABB(center - half_grid_size, grid_size)
