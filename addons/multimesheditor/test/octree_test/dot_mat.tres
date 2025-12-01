@@ -1,7 +1,0 @@
-[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://r2y74umcupcu"]
-
-[ext_resource type="Shader" uid="uid://nh62nlebwllq" path="res://addons/multimesheditor/test/octree_test/dot.gdshader" id="1_xff5t"]
-
-[resource]
-render_priority = 0
-shader = ExtResource("1_xff5t")

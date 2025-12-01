@@ -78,7 +78,7 @@ func _check_paint_logic(viewport_camera, event) -> void:
 
 	if event.shift_pressed:
 		# Erase
-		var result : Dictionary[AABB, PackedInt64Array] = octree.remove_points_in_sphere(t.origin, 10.0)
+		var result : Dictionary[AABB, PackedInt64Array] = octree.remove_points_in_sphere(t.origin, 2.0)
 		for aabb in result:
 			_remove_from_buffer_at_idx_list(aabb, result[aabb])
 		_update_selected_node_buffers()
