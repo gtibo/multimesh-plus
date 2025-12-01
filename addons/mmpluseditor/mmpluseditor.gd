@@ -85,7 +85,7 @@ func _check_paint_logic(viewport_camera, event) -> void:
 	else:
 		for i in range(16):
 			# Paint
-			var offset : Vector2 = _random_in_circle(10.0)
+			var offset : Vector2 = _random_in_circle(1.0)
 			var target = t.translated_local(Vector3(offset.x, 0.0, offset.y))
 			if octree.is_point_in_sphere(target.origin, 1.0): continue
 			_add_transform_to_buffer(target)

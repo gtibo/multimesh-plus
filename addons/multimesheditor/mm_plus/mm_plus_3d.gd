@@ -2,20 +2,43 @@
 class_name MmPlus3D
 extends Node3D
 
+# => moved in MMPlusData
 var multimesh_RID_map : Dictionary[AABB, RID]
 var visual_instance_RID_map : Dictionary[AABB, RID]
-
-const FLOWER_1 : ArrayMesh = preload("uid://d3wriijseqvdb")
-const FLOWER_MAT = preload("uid://cojhtxb1xrv4a")
-
-
-@export var mesh : BoxMesh
-
 @export var multimesh_data_map : Dictionary[AABB, MultiMesh]
 
+# => moved in MMPlusMesh
+@export var mesh : BoxMesh
+
+@export var mesh_list : Array[MMPlusMesh] : set = _set_mesh_list
+@export var data : Array[MMPlusData]
+
+func _set_mesh_list(new_list : Array[MMPlusMesh]) -> void:
+	var previous_list : Array[MMPlusMesh] = mesh_list
+	mesh_list = new_list
+
+
+	# Item moved
+	if new_list.size() == previous_list.size():
+		print("moved")
+		return
+
+	# Item Added
+	if new_list.size() > previous_list.size():
+		print("add")
+		var added_item_idx = new_list.find_custom(func(item): return item == null)
+		mesh_list[added_item_idx] = MMPlusMesh.new()
+		data.append(MMPlusData.new())
+		return
+
+	# Item removed
+	if new_list.size() < previous_list.size():
+		var removed_item_idx : int = previous_list.find_custom(func(item): return !new_list.has(item))
+		print("removed : ", removed_item_idx)
+		data.remove_at(removed_item_idx)
+		return
 
 func _ready() -> void:
-	FLOWER_1.surface_set_material(0, FLOWER_MAT)
 	load_multimesh()
 
 func load_multimesh() -> void:
@@ -63,8 +86,10 @@ func _update_buffer(buffer_map : Dictionary[AABB, PackedFloat32Array]):
 		multimesh.buffer = buffer
 
 func _exit_tree() -> void:
-	for aabb in visual_instance_RID_map:
-		RenderingServer.free_rid(visual_instance_RID_map[aabb])
+	for data_group in data:
 
-	for aabb in multimesh_RID_map:
-		RenderingServer.free_rid(multimesh_RID_map[aabb])
+		for aabb in data_group.visual_instance_RID_map:
+			RenderingServer.free_rid(data_group.visual_instance_RID_map[aabb])
+
+		for aabb in data_group.multimesh_RID_map:
+			RenderingServer.free_rid(data_group.multimesh_RID_map[aabb])
