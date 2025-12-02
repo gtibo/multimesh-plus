@@ -5,16 +5,24 @@ var selected_node : MmPlus3D
 var data_group_list : Array[MMGroup] = []
 
 enum MODE {NONE, PAINT, SCALE, COLOR}
-var current_mode : MODE = MODE.NONE
-const btn_mode_map = {
+var current_mode : MODE = MODE.NONE : set = _set_current_mode
+const btn_mode_map : Dictionary[MODE, Dictionary] = {
 	MODE.PAINT: {"title": "Paint", "icon": "Paint"},
 	MODE.SCALE: {"title": "Scale", "icon": "ToolScale"},
 	MODE.COLOR: {"title": "Colorize", "icon": "Bucket"},
 }
+var brush_size_map : Dictionary[MODE, float] = {
+	MODE.PAINT: 1.0,
+	MODE.SCALE: 1.0,
+	MODE.COLOR: 1.0,
+}
 const BTN_THEME = preload("uid://b2b40e68ae13p")
+const SPHERE_MAT = preload("uid://d3ogk53yp2yvp")
 
 var main_tool_bar : HBoxContainer = null
 var button_group : ButtonGroup = null
+var preview_mesh : MeshInstance3D = null
+var brush_size_box : SpinBox = null
 
 func init_ui() -> void:
 	main_tool_bar = HBoxContainer.new()
@@ -34,6 +42,38 @@ func init_ui() -> void:
 		main_tool_bar.add_child(btn)
 	button_group.allow_unpress = true
 	button_group.pressed.connect(_on_button_group_press)
+	# Create preview mesh
+	preview_mesh = MeshInstance3D.new()
+	get_tree().root.call_deferred("add_child", preview_mesh)
+	preview_mesh.mesh = SphereMesh.new()
+	preview_mesh.material_override = SPHERE_MAT
+	preview_mesh.hide()
+
+	# Brush Size UI
+
+	brush_size_box = SpinBox.new()
+	main_tool_bar.add_child(brush_size_box)
+	brush_size_box.suffix = "m"
+	brush_size_box.min_value = 0.01
+	brush_size_box.step = 0.01
+	brush_size_box.value_changed.connect(_on_brush_size_value_changed)
+
+func _set_current_mode(mode : MODE) -> void:
+	if current_mode == mode: return
+	current_mode = mode
+	if current_mode != MODE.NONE:
+		brush_size_box.set_value_no_signal(brush_size_map[current_mode])
+		_update_brush_preview_size()
+
+func _update_brush_preview_size() -> void:
+	var brush_size : float = brush_size_map[current_mode]
+	preview_mesh.mesh.radius = brush_size
+	preview_mesh.mesh.height = brush_size * 2.0
+
+func _on_brush_size_value_changed(value : float) -> void:
+	if current_mode == MODE.NONE: return
+	brush_size_map[current_mode] = value
+	_update_brush_preview_size()
 
 func _on_button_group_press(_pressed_button : BaseButton):
 	var btn : BaseButton = button_group.get_pressed_button()
@@ -47,6 +87,7 @@ func _exit_tree() -> void:
 	if main_tool_bar == null: return
 	remove_control_from_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_MENU, main_tool_bar)
 	main_tool_bar.queue_free()
+	preview_mesh.queue_free()
 
 func _handles(object : Object) -> bool:
 	return object is MmPlus3D
@@ -63,24 +104,6 @@ func _load_selected_node_data() -> void:
 	for data_group in selected_node.data:
 		var data : Dictionary[AABB, MultiMesh] = data_group.multimesh_data_map
 		data_group_list.append(MMGroup.new(data))
-	
-	#var data : Dictionary[AABB, MultiMesh] = selected_node.multimesh_data_map
-	#
-	#for aabb in data:
-		#buffer_map[aabb] = data[aabb].buffer
-		#var buffer : PackedFloat32Array = data[aabb].buffer
-#
-		#var points = []
-#
-		#for idx in range(0, buffer.size(), 16):
-			#var point = Vector3(
-				#buffer[idx + 3],
-				#buffer[idx + 7],
-				#buffer[idx + 11]
-			#)
-			#points.append(point)
-#
-		#octree.populate(aabb, points)
 
 func _forward_3d_gui_input(viewport_camera, event):
 	if current_mode == MODE.NONE: return EditorPlugin.AFTER_GUI_INPUT_PASS
@@ -99,9 +122,12 @@ func _check_paint_logic(viewport_camera, event) -> void:
 		viewport_camera.global_position + viewport_camera.project_ray_normal(event.position) * 100.0
 		)
 	var ray_cast_result = space_state.intersect_ray(query)
+	preview_mesh.visible = ray_cast_result != {}
 	if !ray_cast_result: return
 
 	var t : Transform3D = Transform3D(_get_basis_from_normal(ray_cast_result.normal), ray_cast_result.position)
+
+	preview_mesh.transform = t
 
 	var is_left_click : bool = event.button_mask == MOUSE_BUTTON_LEFT
 	if !is_left_click: return
@@ -115,17 +141,16 @@ func _check_paint_logic(viewport_camera, event) -> void:
 			#_apply_color_mode(t)
 
 func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
+	var brush_size : float = brush_size_map[current_mode]
 	if event.shift_pressed:
 		# Erase
-		var erase_size : float = 2.0
 		for data_group in data_group_list:
-			data_group.remove_point_in_sphere(t.origin, erase_size)
+			data_group.remove_point_in_sphere(t.origin, brush_size)
 	else:
 		# Paint
 		for i in range(16):
-			var paint_size : float = 2.0
 			var min_space_between_instances : float = 0.5
-			var offset : Vector2 = _random_in_circle(paint_size)
+			var offset : Vector2 = _random_in_circle(brush_size)
 			var target = t.translated_local(Vector3(offset.x, 0.0, offset.y))
 			var overlap : bool = data_group_list.any(func(data_group : MMGroup): 
 				return data_group.octree.is_point_in_sphere(target.origin, min_space_between_instances))

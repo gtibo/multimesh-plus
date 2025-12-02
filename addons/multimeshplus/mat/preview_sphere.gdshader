@@ -16,5 +16,5 @@ void vertex(){
 
 void fragment() {
 	ALBEDO = color;
-	ALPHA = fresnel(2.0, NORMAL, VIEW) * clamp(v.y, 0.0, 1.0) + step(0.5, 1.0 - abs(v.y * 10.0));
+	ALPHA = fresnel(0.5, NORMAL, VIEW) * clamp(v.y, 0.0, 1.0) + step(0.5, 1.0 - abs(v.y * 10.0));
 }

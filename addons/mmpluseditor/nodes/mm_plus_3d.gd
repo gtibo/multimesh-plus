@@ -6,7 +6,6 @@ extends Node3D
 
 @export_tool_button("Delete All Transforms") var delete_all_transforms_actions = delete_all_transforms
 
-
 func _ready() -> void:
 	load_multimesh()
 
