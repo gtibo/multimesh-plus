@@ -1,7 +1,6 @@
-[gd_scene load_steps=41 format=3 uid="uid://c2oaxmwlic2rc"]
+[gd_scene load_steps=17 format=3 uid="uid://c2oaxmwlic2rc"]
 
 [ext_resource type="Script" uid="uid://be4lu3ug8donp" path="res://addons/mmpluseditor/nodes/mm_plus_3d.gd" id="1_xa4g1"]
-[ext_resource type="Script" uid="uid://dre8v2iurryb6" path="res://addons/mmpluseditor/resources/mm_plus_mesh.gd" id="2_w6kgi"]
 [ext_resource type="Resource" uid="uid://cwldwmctr547x" path="res://addons/mmpluseditor/test/cube_mesh.tres" id="3_1flo6"]
 [ext_resource type="Script" uid="uid://ntw5ubccc2qm" path="res://addons/mmpluseditor/resources/mm_plus_data.gd" id="3_1w6gs"]
 [ext_resource type="Resource" uid="uid://cem4ui5pmv3ut" path="res://addons/mmpluseditor/test/sphere_mesh.tres" id="3_w6kgi"]
@@ -17,143 +16,22 @@ ambient_light_color = Color(0.690196, 0.690196, 0.690196, 1)
 tonemap_mode = 2
 glow_enabled = true
 
-[sub_resource type="MultiMesh" id="MultiMesh_h73uu"]
-transform_format = 1
-use_colors = true
-
-[sub_resource type="MultiMesh" id="MultiMesh_ctnn2"]
-transform_format = 1
-use_colors = true
-
-[sub_resource type="MultiMesh" id="MultiMesh_xrcgx"]
-transform_format = 1
-use_colors = true
-
-[sub_resource type="MultiMesh" id="MultiMesh_jdc7n"]
-transform_format = 1
-use_colors = true
-
-[sub_resource type="MultiMesh" id="MultiMesh_86tiq"]
-transform_format = 1
-use_colors = true
-
-[sub_resource type="MultiMesh" id="MultiMesh_q0sc6"]
-transform_format = 1
-use_colors = true
-
 [sub_resource type="Resource" id="Resource_h73uu"]
 script = ExtResource("3_1w6gs")
-multimesh_data_map = Dictionary[AABB, MultiMesh]({
-AABB(0, 0, -20, 20, 20, 20): SubResource("MultiMesh_h73uu"),
-AABB(0, -20, -20, 20, 20, 20): SubResource("MultiMesh_ctnn2"),
-AABB(0, 0, 0, 20, 20, 20): SubResource("MultiMesh_xrcgx"),
-AABB(20, 0, -20, 20, 20, 20): SubResource("MultiMesh_jdc7n"),
-AABB(20, 0, 0, 20, 20, 20): SubResource("MultiMesh_86tiq"),
-AABB(20, -20, -20, 20, 20, 20): SubResource("MultiMesh_q0sc6")
-})
-
-[sub_resource type="MultiMesh" id="MultiMesh_5n3xv"]
-transform_format = 1
-use_colors = true
-
-[sub_resource type="MultiMesh" id="MultiMesh_05qsd"]
-transform_format = 1
-use_colors = true
-
-[sub_resource type="MultiMesh" id="MultiMesh_bho8b"]
-transform_format = 1
-use_colors = true
-
-[sub_resource type="MultiMesh" id="MultiMesh_id5hr"]
-transform_format = 1
-use_colors = true
-
-[sub_resource type="MultiMesh" id="MultiMesh_gyg7u"]
-transform_format = 1
-use_colors = true
+mesh_data = ExtResource("3_1flo6")
 
 [sub_resource type="Resource" id="Resource_xrcgx"]
 script = ExtResource("3_1w6gs")
-multimesh_data_map = Dictionary[AABB, MultiMesh]({
-AABB(0, 0, -20, 20, 20, 20): SubResource("MultiMesh_5n3xv"),
-AABB(0, -20, -20, 20, 20, 20): SubResource("MultiMesh_05qsd"),
-AABB(20, 0, -20, 20, 20, 20): SubResource("MultiMesh_bho8b"),
-AABB(20, 0, 0, 20, 20, 20): SubResource("MultiMesh_id5hr"),
-AABB(0, 0, 0, 20, 20, 20): SubResource("MultiMesh_gyg7u")
-})
-
-[sub_resource type="MultiMesh" id="MultiMesh_ehps6"]
-transform_format = 1
-use_colors = true
-
-[sub_resource type="MultiMesh" id="MultiMesh_1wlv1"]
-transform_format = 1
-use_colors = true
-
-[sub_resource type="MultiMesh" id="MultiMesh_s035d"]
-transform_format = 1
-use_colors = true
-
-[sub_resource type="MultiMesh" id="MultiMesh_puirh"]
-transform_format = 1
-use_colors = true
-
-[sub_resource type="MultiMesh" id="MultiMesh_cqu01"]
-transform_format = 1
-use_colors = true
-
-[sub_resource type="MultiMesh" id="MultiMesh_010ay"]
-transform_format = 1
-use_colors = true
-
-[sub_resource type="Resource" id="Resource_86tiq"]
-script = ExtResource("3_1w6gs")
-multimesh_data_map = Dictionary[AABB, MultiMesh]({
-AABB(0, 0, -20, 20, 20, 20): SubResource("MultiMesh_ehps6"),
-AABB(0, -20, -20, 20, 20, 20): SubResource("MultiMesh_1wlv1"),
-AABB(20, 0, -20, 20, 20, 20): SubResource("MultiMesh_s035d"),
-AABB(20, 0, 0, 20, 20, 20): SubResource("MultiMesh_puirh"),
-AABB(20, -20, -20, 20, 20, 20): SubResource("MultiMesh_cqu01"),
-AABB(0, 0, 0, 20, 20, 20): SubResource("MultiMesh_010ay")
-})
-
-[sub_resource type="MultiMesh" id="MultiMesh_5k2p6"]
-transform_format = 1
-use_colors = true
-
-[sub_resource type="MultiMesh" id="MultiMesh_685h5"]
-transform_format = 1
-use_colors = true
-instance_count = 1
-buffer = PackedFloat32Array(1, 0, 0, -5.703747, 0, 1, 0, 0, 0, 0, 1, -2.0500684, 0.91060543, 0.33761877, 0.2745806, 1)
-
-[sub_resource type="MultiMesh" id="MultiMesh_adao4"]
-transform_format = 1
-use_colors = true
-
-[sub_resource type="MultiMesh" id="MultiMesh_31ftu"]
-transform_format = 1
-use_colors = true
-
-[sub_resource type="MultiMesh" id="MultiMesh_xuq57"]
-transform_format = 1
-use_colors = true
-
-[sub_resource type="MultiMesh" id="MultiMesh_iskgq"]
-transform_format = 1
-use_colors = true
+mesh_data = ExtResource("6_h73uu")
 
 [sub_resource type="Resource" id="Resource_1flo6"]
 script = ExtResource("3_1w6gs")
-multimesh_data_map = Dictionary[AABB, MultiMesh]({
-AABB(0, 0, -20, 20, 20, 20): SubResource("MultiMesh_5k2p6"),
-AABB(-20, 0, -20, 20, 20, 20): SubResource("MultiMesh_685h5"),
-AABB(0, 0, 0, 20, 20, 20): SubResource("MultiMesh_adao4"),
-AABB(0, -20, -20, 20, 20, 20): SubResource("MultiMesh_31ftu"),
-AABB(20, 0, -20, 20, 20, 20): SubResource("MultiMesh_xuq57"),
-AABB(20, 0, 0, 20, 20, 20): SubResource("MultiMesh_iskgq")
-})
+mesh_data = ExtResource("4_h73uu")
 metadata/_custom_type_script = "uid://ntw5ubccc2qm"
+
+[sub_resource type="Resource" id="Resource_86tiq"]
+script = ExtResource("3_1w6gs")
+mesh_data = ExtResource("3_w6kgi")
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_u2sx3"]
 radius = 8.0
@@ -180,8 +58,7 @@ directional_shadow_max_distance = 30.0
 
 [node name="MmPlus3D" type="Node3D" parent="."]
 script = ExtResource("1_xa4g1")
-mesh_list = Array[ExtResource("2_w6kgi")]([ExtResource("3_1flo6"), ExtResource("4_h73uu"), ExtResource("3_w6kgi"), ExtResource("6_h73uu")])
-data = Array[ExtResource("3_1w6gs")]([SubResource("Resource_h73uu"), SubResource("Resource_xrcgx"), SubResource("Resource_86tiq"), SubResource("Resource_1flo6")])
+data = Array[ExtResource("3_1w6gs")]([SubResource("Resource_h73uu"), SubResource("Resource_xrcgx"), SubResource("Resource_1flo6"), SubResource("Resource_86tiq")])
 metadata/_custom_type_script = "uid://be4lu3ug8donp"
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]

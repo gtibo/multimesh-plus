@@ -2,35 +2,27 @@
 class_name MmPlus3D
 extends Node3D
 
-@export var mesh_list : Array[MMPlusMesh]
-@export_storage var data : Array[MMPlusData]
+@export var data : Array[MMPlusData]
 
-func _set_mesh_list(new_list : Array[MMPlusMesh]) -> void:
-	var previous_list : Array[MMPlusMesh] = mesh_list
-	mesh_list = new_list
+@export_tool_button("Delete All Transforms") var delete_all_transforms_actions = delete_all_transforms
 
-	# Item moved
-	if new_list.size() == previous_list.size():
-		print("moved")
-		return
-
-	# Item Added
-	if new_list.size() > previous_list.size():
-		print("add")
-		var added_item_idx = new_list.find_custom(func(item): return item == null)
-		mesh_list[added_item_idx] = MMPlusMesh.new()
-		data.append(MMPlusData.new())
-		return
-
-	# Item removed
-	if new_list.size() < previous_list.size():
-		var removed_item_idx : int = previous_list.find_custom(func(item): return !new_list.has(item))
-		print("removed : ", removed_item_idx)
-		data.remove_at(removed_item_idx)
-		return
 
 func _ready() -> void:
 	load_multimesh()
+
+func delete_all_transforms() -> void:
+	for data_group_idx in data.size():
+		var data_group : MMPlusData = data[data_group_idx]
+
+		for aabb in data_group.visual_instance_RID_map:
+			RenderingServer.free_rid(data_group.visual_instance_RID_map[aabb])
+		data_group.visual_instance_RID_map = {}
+
+		for aabb in data_group.multimesh_RID_map:
+			RenderingServer.free_rid(data_group.multimesh_RID_map[aabb])
+		data_group.multimesh_RID_map = {}
+
+		data_group.multimesh_data_map = {}
 
 func load_multimesh() -> void:
 	for group_idx in data.size():
@@ -48,10 +40,10 @@ func load_multimesh() -> void:
 		_update_buffer(group_idx, buffer_map)
 
 func _add_visual_instance(group_idx : int, aabb : AABB) -> void:
-	var mesh : Mesh = mesh_list[group_idx].mesh
+	var mesh : Mesh = data[group_idx].mesh_data.mesh
 	var m_rid = RenderingServer.multimesh_create()
 	var i_rid : RID = RenderingServer.instance_create2(m_rid, get_world_3d().scenario)
-	RenderingServer.instance_set_transform(i_rid, Transform3D.IDENTITY)
+	RenderingServer.instance_set_transform(i_rid, global_transform)
 	RenderingServer.instance_set_custom_aabb(i_rid, aabb)
 	RenderingServer.multimesh_set_mesh(m_rid, mesh.get_rid())
 	RenderingServer.instance_geometry_set_visibility_range(i_rid, 0.0, 100.0, 0.0, 0.0, RenderingServer.VISIBILITY_RANGE_FADE_DISABLED)
