@@ -28,6 +28,18 @@ func remove_point_in_sphere(position : Vector3, radius : float = 1.0) -> void:
 	for aabb in result:
 		remove_from_buffer_at_idx_list(aabb, result[aabb])
 
+func set_buffer_color_in_sphere(position : Vector3, radius : float = 1.0, base_color : Color = Color.BLACK, random_color : bool = false):
+
+	var result : Dictionary[AABB, PackedInt64Array] = octree.get_points_in_sphere(position, radius)
+	for aabb in result:
+		for idx in result[aabb]:
+			idx *= 16
+			var color : Color = Color(randf(), randf(), randf(), randf()) if random_color else base_color
+			buffer_map[aabb][idx + 12] = color.r
+			buffer_map[aabb][idx + 13] = color.g
+			buffer_map[aabb][idx + 14] = color.b
+			buffer_map[aabb][idx + 15] = color.a
+
 func add_transform_to_buffer(t : Transform3D) -> void:
 	var region : AABB = octree.check_region_for_point(t.origin)
 

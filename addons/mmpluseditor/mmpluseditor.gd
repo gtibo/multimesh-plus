@@ -20,13 +20,18 @@ const BTN_THEME = preload("uid://b2b40e68ae13p")
 const SPHERE_MAT = preload("uid://d3ogk53yp2yvp")
 
 var main_tool_bar : HBoxContainer = null
+var color_tool_bar : HBoxContainer = null
+var color_picker : ColorPickerButton = null
 var button_group : ButtonGroup = null
 var preview_mesh : MeshInstance3D = null
 var brush_size_box : SpinBox = null
+var randomize_color_button : Button = null
 
 func init_ui() -> void:
 	main_tool_bar = HBoxContainer.new()
+	color_tool_bar = HBoxContainer.new()
 	main_tool_bar.hide()
+	color_tool_bar.hide()
 	add_control_to_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_MENU, main_tool_bar)
 	var base_control = EditorInterface.get_base_control()
 	button_group = ButtonGroup.new()
@@ -58,12 +63,30 @@ func init_ui() -> void:
 	brush_size_box.step = 0.01
 	brush_size_box.value_changed.connect(_on_brush_size_value_changed)
 
+	# Color panel
+	color_picker = ColorPickerButton.new()
+	color_picker.custom_minimum_size.x = 64.0
+	color_tool_bar.add_child(color_picker)
+
+	randomize_color_button = Button.new()
+	randomize_color_button.icon = base_control.get_theme_icon("RandomNumberGenerator", "EditorIcons")
+	randomize_color_button.theme = BTN_THEME
+	randomize_color_button.toggle_mode = true
+	randomize_color_button.tooltip_text = "Randomize Color"
+	color_tool_bar.add_child(randomize_color_button)
+
+
+	main_tool_bar.add_child(color_tool_bar)
+
 func _set_current_mode(mode : MODE) -> void:
 	if current_mode == mode: return
 	current_mode = mode
+
 	if current_mode != MODE.NONE:
 		brush_size_box.set_value_no_signal(brush_size_map[current_mode])
 		_update_brush_preview_size()
+	
+	color_tool_bar.visible = current_mode == MODE.COLOR
 
 func _update_brush_preview_size() -> void:
 	var brush_size : float = brush_size_map[current_mode]
@@ -137,8 +160,8 @@ func _check_paint_logic(viewport_camera, event) -> void:
 			_apply_paint_mode(event, t)
 		MODE.SCALE:
 			_apply_transform_mode(event, t)
-		#MODE.COLOR:
-			#_apply_color_mode(t)
+		MODE.COLOR:
+			_apply_color_mode(t)
 
 func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 	var brush_size : float = brush_size_map[current_mode]
@@ -176,6 +199,12 @@ func _apply_transform_mode(event : InputEventMouse, t : Transform3D) -> void:
 					var scale_value : float = 0.1 * factor
 					data_group.increment_buffer_transform_scale(aabb, idx, -scale_value if event.shift_pressed else scale_value)
 
+	_update_selected_node_buffers()
+
+func _apply_color_mode(t : Transform3D) -> void:
+	var brush_size : float = brush_size_map[current_mode]
+	for data_group in data_group_list:
+				data_group.set_buffer_color_in_sphere(t.origin, brush_size, color_picker.color, randomize_color_button.button_pressed)
 	_update_selected_node_buffers()
 
 func _random_in_circle(radius : float = 1.0) -> Vector2:

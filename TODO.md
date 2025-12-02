@@ -12,6 +12,6 @@ Todo list
 [] Probability based placement (e.g. 20% this and 80% that)
 [X] Paint Mode
 [X] Scale Mode
-[] Color Mode
+[X] Color Mode
 [] Add undo / redo
 [] Add mm+ node Icon 
