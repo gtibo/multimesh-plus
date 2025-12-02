@@ -50,3 +50,41 @@ func remove_from_buffer_at_idx(aabb : AABB, idx : int):
 	var idx_offset : int = size * idx
 	for i in range(size - 1 + idx_offset, -1 + idx_offset, -1):
 		buffer_map[aabb].remove_at(i)
+
+func get_buffer_transform_basis(aabb : AABB, idx : int) -> Basis:
+	return Basis(
+		Vector3(buffer_map[aabb][idx + 0], buffer_map[aabb][idx + 4], buffer_map[aabb][idx + 8]),
+		Vector3(buffer_map[aabb][idx + 1], buffer_map[aabb][idx + 5], buffer_map[aabb][idx + 9]),
+		Vector3(buffer_map[aabb][idx + 2], buffer_map[aabb][idx + 6], buffer_map[aabb][idx + 10])
+	)
+
+func get_buffer_transform(aabb : AABB, idx : int) -> Transform3D:
+	var basis : Basis = get_buffer_transform_basis(aabb, idx)
+	return Transform3D(basis, Vector3(idx + 3, idx + 7, idx + 11))
+
+func set_buffer_transform_scale(aabb : AABB, idx : int, scale : float) -> void:
+	idx *= 16
+	var basis : Basis = get_buffer_transform_basis(aabb, idx)
+	basis = basis.orthonormalized().scaled_local(Vector3.ONE * scale)
+	_apply_basis_to_buffer(aabb, idx, basis)
+
+func increment_buffer_transform_scale(aabb : AABB, idx : int, increment : float = 0.0) -> void:
+	idx *= 16
+	var basis : Basis = get_buffer_transform_basis(aabb, idx)
+	var scale : float = basis.get_scale()[0] + increment
+	scale = clampf(scale, 0.1, 10.0)
+	basis = basis.orthonormalized().scaled_local(Vector3.ONE * scale)
+	_apply_basis_to_buffer(aabb, idx, basis)
+
+func _apply_basis_to_buffer(aabb : AABB, idx, basis : Basis) -> void:
+	buffer_map[aabb][idx + 0] = basis.x.x
+	buffer_map[aabb][idx + 1] = basis.y.x
+	buffer_map[aabb][idx + 2] = basis.z.x
+
+	buffer_map[aabb][idx + 4] = basis.x.y
+	buffer_map[aabb][idx + 5] = basis.y.y
+	buffer_map[aabb][idx + 6] = basis.z.y
+
+	buffer_map[aabb][idx + 8] = basis.x.z
+	buffer_map[aabb][idx + 9] = basis.y.z
+	buffer_map[aabb][idx + 10] = basis.z.z

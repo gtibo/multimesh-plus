@@ -28,7 +28,7 @@ movie_writer/mjpeg_quality=1.0
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/mmpluseditor/plugin.cfg")
+enabled=PackedStringArray("res://addons/mmpluseditor/plugin.cfg", "res://addons/multimeshplus/plugin.cfg")
 
 [rendering]
 

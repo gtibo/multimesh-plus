@@ -135,8 +135,8 @@ func _check_paint_logic(viewport_camera, event) -> void:
 	match current_mode:
 		MODE.PAINT:
 			_apply_paint_mode(event, t)
-		#MODE.SCALE:
-			#_apply_transform_mode(event, t)
+		MODE.SCALE:
+			_apply_transform_mode(event, t)
 		#MODE.COLOR:
 			#_apply_color_mode(t)
 
@@ -160,6 +160,23 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 
 	_update_selected_node_buffers()
 
+func _apply_transform_mode(event : InputEventMouse, t : Transform3D) -> void:
+	var brush_size : float = brush_size_map[current_mode]
+
+	for data_group in data_group_list:
+		var result : Dictionary[AABB, PackedInt64Array] = data_group.octree.get_points_in_sphere(t.origin, brush_size)
+
+		for aabb in result:
+			for idx in result[aabb]:
+				if event.ctrl_pressed:
+					data_group.set_buffer_transform_scale(aabb, idx, 1.0)
+				else:
+					var point_position : Vector3 = data_group.octree.get_point_position(aabb, idx)
+					var factor : float = (brush_size - point_position.distance_to(t.origin)) / brush_size
+					var scale_value : float = 0.1 * factor
+					data_group.increment_buffer_transform_scale(aabb, idx, -scale_value if event.shift_pressed else scale_value)
+
+	_update_selected_node_buffers()
 
 func _random_in_circle(radius : float = 1.0) -> Vector2:
 	var r = radius * sqrt(randf())

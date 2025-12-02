@@ -51,8 +51,23 @@ func is_point_in_sphere(position : Vector3, radius : float = 1.0) -> bool:
 				return true
 	return false
 
-func get_points_in_sphere(position : Vector3, radius : float = 1.0):
-	pass
+func get_points_in_sphere(position : Vector3, radius : float = 1.0) -> Dictionary[AABB, PackedInt64Array]:
+	var result : Dictionary[AABB, PackedInt64Array] = {}
+	for aabb in region_map.keys():
+		aabb = aabb as AABB
+		if !aabb_overlap_with_sphere(aabb, position, radius): continue
+		var id_pos_list : IdPosList = region_map[aabb]
+		result[aabb] = PackedInt64Array()
+		for i in id_pos_list.count:
+			var point : Vector3 = id_pos_list.position_list[i]
+			if point.distance_to(position) < radius:
+				result[aabb].append(id_pos_list.idx_list[i])
+
+	return result
+
+func get_point_position(aabb : AABB, idx : int):
+	var p_idx : int = region_map[aabb].idx_list.find(idx)
+	return region_map[aabb].position_list[p_idx]
 
 func remove_points_in_sphere(position : Vector3, radius : float = 1.0) -> Dictionary[AABB, PackedInt64Array]:
 	var result : Dictionary[AABB, PackedInt64Array] = {}

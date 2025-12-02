@@ -6,11 +6,12 @@ Todo list
 [x] Placement based on distance rules
 [X] Brush Preview
 [X] Brush Size
+[] instance spawn distance option
 [] Base UI
 [] Poisson disk sampling
 [] Probability based placement (e.g. 20% this and 80% that)
 [X] Paint Mode
-[] Scale Mode
+[X] Scale Mode
 [] Color Mode
 [] Add undo / redo
 [] Add mm+ node Icon 
