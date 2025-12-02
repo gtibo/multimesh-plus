@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="MMPlusMesh" load_steps=4 format=3 uid="uid://cem4ui5pmv3ut"]
+
+[ext_resource type="Script" uid="uid://dre8v2iurryb6" path="res://addons/mmpluseditor/resources/mm_plus_mesh.gd" id="1_atkjo"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_atkjo"]
+albedo_color = Color(0.99016684, 0.41000003, 1, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_xa4g1"]
+material = SubResource("StandardMaterial3D_atkjo")
+radius = 0.2
+height = 0.4
+
+[resource]
+script = ExtResource("1_atkjo")
+mesh = SubResource("SphereMesh_xa4g1")

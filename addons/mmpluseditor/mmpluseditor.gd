@@ -2,8 +2,7 @@
 extends EditorPlugin
 
 var selected_node : MmPlus3D
-var octree : Octree
-var buffer_map : Dictionary[AABB, PackedFloat32Array] = {}
+var data_group_list : Array[MMGroup] = []
 
 func _enable_plugin() -> void:
 	# Add autoloads here.
@@ -28,28 +27,31 @@ func _edit(object) -> void:
 	var previous_selected_node : MmPlus3D = selected_node
 	selected_node = object
 	if selected_node:
-		buffer_map = {}
-		octree = Octree.new()
+		data_group_list = []
 		_load_selected_node_data()
 
 func _load_selected_node_data() -> void:
-	var data : Dictionary[AABB, MultiMesh] = selected_node.multimesh_data_map
+	for data_group in selected_node.data:
+		var data : Dictionary[AABB, MultiMesh] = data_group.multimesh_data_map
+		data_group_list.append(MMGroup.new(data))
 	
-	for aabb in data:
-		buffer_map[aabb] = data[aabb].buffer
-		var buffer : PackedFloat32Array = data[aabb].buffer
-
-		var points = []
-
-		for idx in range(0, buffer.size(), 16):
-			var point = Vector3(
-				buffer[idx + 3],
-				buffer[idx + 7],
-				buffer[idx + 11]
-			)
-			points.append(point)
-
-		octree.populate(aabb, points)
+	#var data : Dictionary[AABB, MultiMesh] = selected_node.multimesh_data_map
+	#
+	#for aabb in data:
+		#buffer_map[aabb] = data[aabb].buffer
+		#var buffer : PackedFloat32Array = data[aabb].buffer
+#
+		#var points = []
+#
+		#for idx in range(0, buffer.size(), 16):
+			#var point = Vector3(
+				#buffer[idx + 3],
+				#buffer[idx + 7],
+				#buffer[idx + 11]
+			#)
+			#points.append(point)
+#
+		#octree.populate(aabb, points)
 
 func _forward_3d_gui_input(viewport_camera, event) -> int:
 	var mouse_event : InputEventMouse = event as InputEventMouse
@@ -78,18 +80,24 @@ func _check_paint_logic(viewport_camera, event) -> void:
 
 	if event.shift_pressed:
 		# Erase
-		var result : Dictionary[AABB, PackedInt64Array] = octree.remove_points_in_sphere(t.origin, 2.0)
-		for aabb in result:
-			_remove_from_buffer_at_idx_list(aabb, result[aabb])
+		var erase_size : float = 2.0
+		for data_group in data_group_list:
+			data_group.remove_point_in_sphere(t.origin, erase_size)
+
 		_update_selected_node_buffers()
 	else:
 		for i in range(16):
 			# Paint
-			var offset : Vector2 = _random_in_circle(1.0)
+			var paint_size : float = 2.0
+			var min_space_between_instances : float = 0.5
+			var offset : Vector2 = _random_in_circle(paint_size)
 			var target = t.translated_local(Vector3(offset.x, 0.0, offset.y))
-			if octree.is_point_in_sphere(target.origin, 1.0): continue
-			_add_transform_to_buffer(target)
-			_update_selected_node_buffers()
+			var overlap : bool = data_group_list.any(func(data_group : MMGroup): 
+				return data_group.octree.is_point_in_sphere(target.origin, min_space_between_instances))
+			if overlap: continue
+			var data_group : MMGroup = data_group_list[randi() % data_group_list.size()]
+			data_group.add_transform_to_buffer(target)
+		_update_selected_node_buffers()
 
 
 func _random_in_circle(radius : float = 1.0) -> Vector2:
@@ -97,31 +105,8 @@ func _random_in_circle(radius : float = 1.0) -> Vector2:
 	var theta = randf() * TAU
 	return Vector2.from_angle(theta) * r
 
-func _add_transform_to_buffer(t : Transform3D) -> void:
-	var region : AABB = octree.check_region_for_point(t.origin)
-
-	if !buffer_map.has(region):
-		buffer_map[region] = PackedFloat32Array()
-
-	buffer_map[region].append_array(
-		[t.basis.x.x, t.basis.y.x, t.basis.z.x, t.origin.x, t.basis.x.y, t.basis.y.y, t.basis.z.y, t.origin.y, t.basis.x.z, t.basis.y.z, t.basis.z.z, t.origin.z, randf(), randf(), randf(), 1.0]
-		)
-	var idx : int = buffer_map[region].size() / 16 - 1
-
-	octree.add_point_in_region(region, idx, t.origin)
-
-func _remove_from_buffer_at_idx_list(aabb : AABB, idx_list : PackedInt64Array):
-	for idx in range(idx_list.size() - 1 , -1, -1):
-		_remove_from_buffer_at_idx(aabb, idx_list[idx])
-
-func _remove_from_buffer_at_idx(aabb : AABB, idx : int):
-	var size : int = 16
-	var idx_offset : int = size * idx
-	for i in range(size - 1 + idx_offset, -1 + idx_offset, -1):
-		buffer_map[aabb].remove_at(i)
-
 func _update_selected_node_buffers() -> void:
-	selected_node._update_buffer(buffer_map)
+	selected_node.update_group_buffer(data_group_list)
 
 func _get_basis_from_normal(normal : Vector3) -> Basis:
 	var basis = Basis.IDENTITY
