@@ -4,21 +4,49 @@ extends EditorPlugin
 var selected_node : MmPlus3D
 var data_group_list : Array[MMGroup] = []
 
-func _enable_plugin() -> void:
-	# Add autoloads here.
-	pass
+enum MODE {NONE, PAINT, SCALE, COLOR}
+var current_mode : MODE = MODE.NONE
+const btn_mode_map = {
+	MODE.PAINT: {"title": "Paint", "icon": "Paint"},
+	MODE.SCALE: {"title": "Scale", "icon": "ToolScale"},
+	MODE.COLOR: {"title": "Colorize", "icon": "Bucket"},
+}
+const BTN_THEME = preload("uid://b2b40e68ae13p")
 
-func _disable_plugin() -> void:
-	# Remove autoloads here.
-	pass
+var main_tool_bar : HBoxContainer = null
+var button_group : ButtonGroup = null
+
+func init_ui() -> void:
+	main_tool_bar = HBoxContainer.new()
+	main_tool_bar.hide()
+	add_control_to_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_MENU, main_tool_bar)
+	var base_control = EditorInterface.get_base_control()
+	button_group = ButtonGroup.new()
+	# Create mode buttons
+	for btn_id in btn_mode_map:
+		var btn : Button = Button.new()
+		btn.theme = BTN_THEME
+		btn.text = btn_mode_map[btn_id].title
+		btn.icon = base_control.get_theme_icon(btn_mode_map[btn_id].icon, "EditorIcons")
+		btn.button_group = button_group
+		btn.toggle_mode = true
+		btn.set_meta("ID", btn_id)
+		main_tool_bar.add_child(btn)
+	button_group.allow_unpress = true
+	button_group.pressed.connect(_on_button_group_press)
+
+func _on_button_group_press(_pressed_button : BaseButton):
+	var btn : BaseButton = button_group.get_pressed_button()
+	current_mode = MODE.NONE if btn == null else btn.get_meta("ID", 0)
+	selected_node.set_meta("_edit_lock_", null if btn == null else true)
 
 func _enter_tree() -> void:
-	# Initialization of the plugin goes here.
-	pass
+	init_ui()
 
 func _exit_tree() -> void:
-	# Clean-up of the plugin goes here.
-	pass
+	if main_tool_bar == null: return
+	remove_control_from_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_MENU, main_tool_bar)
+	main_tool_bar.queue_free()
 
 func _handles(object : Object) -> bool:
 	return object is MmPlus3D
@@ -26,9 +54,10 @@ func _handles(object : Object) -> bool:
 func _edit(object) -> void:
 	var previous_selected_node : MmPlus3D = selected_node
 	selected_node = object
-	if selected_node:
-		data_group_list = []
+	data_group_list = []
+	if selected_node != null:
 		_load_selected_node_data()
+	main_tool_bar.visible = selected_node != null
 
 func _load_selected_node_data() -> void:
 	for data_group in selected_node.data:
@@ -53,21 +82,17 @@ func _load_selected_node_data() -> void:
 #
 		#octree.populate(aabb, points)
 
-func _forward_3d_gui_input(viewport_camera, event) -> int:
-	var mouse_event : InputEventMouse = event as InputEventMouse
-	if !mouse_event: return EditorPlugin.AFTER_GUI_INPUT_PASS
+func _forward_3d_gui_input(viewport_camera, event):
+	if current_mode == MODE.NONE: return EditorPlugin.AFTER_GUI_INPUT_PASS
 	_check_paint_logic(viewport_camera, event)
-	var mouse_button_event : InputEventMouseButton = event as InputEventMouseButton
-	var is_left_click : bool = mouse_button_event && mouse_button_event.button_index == MOUSE_BUTTON_LEFT
+	var is_left_click : bool = event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT && event.pressed
 	if !is_left_click: return EditorPlugin.AFTER_GUI_INPUT_PASS
 	return EditorPlugin.AFTER_GUI_INPUT_STOP
 
 func _check_paint_logic(viewport_camera, event) -> void:
 	var mouse_event : InputEventMouse = event as InputEventMouse
 	if !mouse_event: return
-	var is_left_click : bool = event.button_mask == MOUSE_BUTTON_LEFT
-	if !is_left_click: return
-	
+
 	var space_state : PhysicsDirectSpaceState3D = viewport_camera.get_world_3d().direct_space_state
 	var query = PhysicsRayQueryParameters3D.create(
 		viewport_camera.global_position,
@@ -78,16 +103,26 @@ func _check_paint_logic(viewport_camera, event) -> void:
 
 	var t : Transform3D = Transform3D(_get_basis_from_normal(ray_cast_result.normal), ray_cast_result.position)
 
+	var is_left_click : bool = event.button_mask == MOUSE_BUTTON_LEFT
+	if !is_left_click: return
+
+	match current_mode:
+		MODE.PAINT:
+			_apply_paint_mode(event, t)
+		#MODE.SCALE:
+			#_apply_transform_mode(event, t)
+		#MODE.COLOR:
+			#_apply_color_mode(t)
+
+func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 	if event.shift_pressed:
 		# Erase
 		var erase_size : float = 2.0
 		for data_group in data_group_list:
 			data_group.remove_point_in_sphere(t.origin, erase_size)
-
-		_update_selected_node_buffers()
 	else:
+		# Paint
 		for i in range(16):
-			# Paint
 			var paint_size : float = 2.0
 			var min_space_between_instances : float = 0.5
 			var offset : Vector2 = _random_in_circle(paint_size)
@@ -97,7 +132,8 @@ func _check_paint_logic(viewport_camera, event) -> void:
 			if overlap: continue
 			var data_group : MMGroup = data_group_list[randi() % data_group_list.size()]
 			data_group.add_transform_to_buffer(target)
-		_update_selected_node_buffers()
+
+	_update_selected_node_buffers()
 
 
 func _random_in_circle(radius : float = 1.0) -> Vector2:

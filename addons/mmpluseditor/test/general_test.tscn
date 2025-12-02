@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://c2oaxmwlic2rc"]
+[gd_scene load_steps=73 format=3 uid="uid://c2oaxmwlic2rc"]
 
 [ext_resource type="Script" uid="uid://be4lu3ug8donp" path="res://addons/mmpluseditor/nodes/mm_plus_3d.gd" id="1_xa4g1"]
 [ext_resource type="Resource" uid="uid://cwldwmctr547x" path="res://addons/mmpluseditor/test/cube_mesh.tres" id="3_1flo6"]
@@ -16,22 +16,318 @@ ambient_light_color = Color(0.690196, 0.690196, 0.690196, 1)
 tonemap_mode = 2
 glow_enabled = true
 
+[sub_resource type="MultiMesh" id="MultiMesh_1flo6"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_h73uu"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_ctnn2"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_cqu01"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_010ay"]
+transform_format = 1
+use_colors = true
+instance_count = 1
+buffer = PackedFloat32Array(0.060765468, 0.88617676, -0.45934567, 6.3827734, -0.9981521, 0.053948637, -0.02796403, -0.5915923, 0, 0.46019605, 0.88781726, 5.162259, 0.4561341, 0.5349861, 0.2577047, 1)
+
+[sub_resource type="MultiMesh" id="MultiMesh_685h5"]
+transform_format = 1
+use_colors = true
+instance_count = 3
+buffer = PackedFloat32Array(1, 0, 0, -0.23569515, 0, 1, 0, -1.9073486e-06, 0, 0, 1, 7.1396456, 0.62224096, 0.8994546, 0.0044776667, 1, 0.036241427, -0.72549355, 0.6872742, -4.804155, 0.99934304, 0.026310207, -0.024924174, -0.79377854, 0, 0.68772596, 0.7259703, 6.594925, 0.8589371, 0.6316394, 0.49759692, 1, 0.036241427, -0.72549355, 0.6872742, -5.070547, 0.99934304, 0.026310207, -0.024924174, -1.1689764, 0, 0.68772596, 0.7259703, 6.328257, 0.36642694, 0.2014151, 0.35276216, 1)
+
+[sub_resource type="MultiMesh" id="MultiMesh_mtngi"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_d5vvt"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_083uq"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_tq0ng"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_bi2h1"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_0mrqs"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_cc1g2"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_x50ts"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_ay80k"]
+transform_format = 1
+use_colors = true
+
 [sub_resource type="Resource" id="Resource_h73uu"]
 script = ExtResource("3_1w6gs")
 mesh_data = ExtResource("3_1flo6")
+multimesh_data_map = Dictionary[AABB, MultiMesh]({
+AABB(-20, 0, 0, 20, 20, 20): SubResource("MultiMesh_1flo6"),
+AABB(0, 0, 0, 20, 20, 20): SubResource("MultiMesh_h73uu"),
+AABB(-20, 0, -20, 20, 20, 20): SubResource("MultiMesh_ctnn2"),
+AABB(0, 0, -20, 20, 20, 20): SubResource("MultiMesh_cqu01"),
+AABB(0, -20, 0, 20, 20, 20): SubResource("MultiMesh_010ay"),
+AABB(-20, -20, 0, 20, 20, 20): SubResource("MultiMesh_685h5"),
+AABB(-40, 0, -80, 20, 20, 20): SubResource("MultiMesh_mtngi"),
+AABB(-40, 0, -60, 20, 20, 20): SubResource("MultiMesh_d5vvt"),
+AABB(-40, 0, -40, 20, 20, 20): SubResource("MultiMesh_083uq"),
+AABB(-40, 0, -20, 20, 20, 20): SubResource("MultiMesh_tq0ng"),
+AABB(-20, 0, -40, 20, 20, 20): SubResource("MultiMesh_bi2h1"),
+AABB(-20, -20, -40, 20, 20, 20): SubResource("MultiMesh_0mrqs"),
+AABB(0, 0, -40, 20, 20, 20): SubResource("MultiMesh_cc1g2"),
+AABB(0, 0, -60, 20, 20, 20): SubResource("MultiMesh_x50ts"),
+AABB(-20, -20, -20, 20, 20, 20): SubResource("MultiMesh_ay80k")
+})
+
+[sub_resource type="MultiMesh" id="MultiMesh_s035d"]
+transform_format = 1
+use_colors = true
+instance_count = 2
+buffer = PackedFloat32Array(0.11712155, 0.8712948, -0.47657952, 6.7108507, -0.99311763, 0.102754585, -0.056204546, -0.7869779, 0, 0.47988224, 0.8773329, 4.6547604, 0.7473723, 0.43598208, 0.59459496, 1, 0.08221942, 0.7231853, -0.6857428, 5.639763, -0.9966143, 0.059661876, -0.056572918, -1.000447, 0, 0.6880724, 0.725642, 5.785866, 0.73034984, 0.2927925, 0.42298836, 1)
+
+[sub_resource type="MultiMesh" id="MultiMesh_xrcgx"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_jdc7n"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_86tiq"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_q0sc6"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_adao4"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_cokws"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_ul4q3"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_0qixq"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_x4o7u"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_iaupp"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_kllo8"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_6fq80"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_hegyx"]
+transform_format = 1
+use_colors = true
 
 [sub_resource type="Resource" id="Resource_xrcgx"]
 script = ExtResource("3_1w6gs")
 mesh_data = ExtResource("6_h73uu")
+multimesh_data_map = Dictionary[AABB, MultiMesh]({
+AABB(0, -20, 0, 20, 20, 20): SubResource("MultiMesh_s035d"),
+AABB(-20, 0, 0, 20, 20, 20): SubResource("MultiMesh_xrcgx"),
+AABB(0, 0, 0, 20, 20, 20): SubResource("MultiMesh_jdc7n"),
+AABB(-20, 0, -20, 20, 20, 20): SubResource("MultiMesh_86tiq"),
+AABB(-40, 0, -20, 20, 20, 20): SubResource("MultiMesh_q0sc6"),
+AABB(0, 0, -20, 20, 20, 20): SubResource("MultiMesh_adao4"),
+AABB(-20, -20, 0, 20, 20, 20): SubResource("MultiMesh_cokws"),
+AABB(-40, 0, -80, 20, 20, 20): SubResource("MultiMesh_ul4q3"),
+AABB(-40, 0, -60, 20, 20, 20): SubResource("MultiMesh_0qixq"),
+AABB(-40, 0, -40, 20, 20, 20): SubResource("MultiMesh_x4o7u"),
+AABB(-20, 0, -40, 20, 20, 20): SubResource("MultiMesh_iaupp"),
+AABB(-20, -20, -40, 20, 20, 20): SubResource("MultiMesh_kllo8"),
+AABB(0, 0, -40, 20, 20, 20): SubResource("MultiMesh_6fq80"),
+AABB(0, 0, -60, 20, 20, 20): SubResource("MultiMesh_hegyx")
+})
+
+[sub_resource type="MultiMesh" id="MultiMesh_5n3xv"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_05qsd"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_bho8b"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_id5hr"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_gyg7u"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_31ftu"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_l3dwr"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_baa6d"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_oiwvo"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_vu7hm"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_tt286"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_8rptu"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_u01fc"]
+transform_format = 1
+use_colors = true
 
 [sub_resource type="Resource" id="Resource_1flo6"]
 script = ExtResource("3_1w6gs")
 mesh_data = ExtResource("4_h73uu")
+multimesh_data_map = Dictionary[AABB, MultiMesh]({
+AABB(-20, 0, 0, 20, 20, 20): SubResource("MultiMesh_5n3xv"),
+AABB(0, 0, 0, 20, 20, 20): SubResource("MultiMesh_05qsd"),
+AABB(0, -20, 0, 20, 20, 20): SubResource("MultiMesh_bho8b"),
+AABB(-20, -20, 0, 20, 20, 20): SubResource("MultiMesh_id5hr"),
+AABB(-20, 0, -20, 20, 20, 20): SubResource("MultiMesh_gyg7u"),
+AABB(0, 0, -20, 20, 20, 20): SubResource("MultiMesh_31ftu"),
+AABB(-40, 0, -80, 20, 20, 20): SubResource("MultiMesh_l3dwr"),
+AABB(-40, 0, -60, 20, 20, 20): SubResource("MultiMesh_baa6d"),
+AABB(-40, 0, -40, 20, 20, 20): SubResource("MultiMesh_oiwvo"),
+AABB(-40, 0, -20, 20, 20, 20): SubResource("MultiMesh_vu7hm"),
+AABB(-20, 0, -40, 20, 20, 20): SubResource("MultiMesh_tt286"),
+AABB(-20, -20, -40, 20, 20, 20): SubResource("MultiMesh_8rptu"),
+AABB(0, 0, -60, 20, 20, 20): SubResource("MultiMesh_u01fc")
+})
 metadata/_custom_type_script = "uid://ntw5ubccc2qm"
+
+[sub_resource type="MultiMesh" id="MultiMesh_rn1h8"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_ehps6"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_1wlv1"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_puirh"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_xuq57"]
+transform_format = 1
+use_colors = true
+instance_count = 1
+buffer = PackedFloat32Array(0.060765468, 0.88617676, -0.45934567, 7.185287, -0.9981521, 0.053948637, -0.02796403, -1.4940889, 0, 0.46019605, 0.88781726, 3.7226982, 0.8143607, 0.7963775, 0.6414316, 1)
+
+[sub_resource type="MultiMesh" id="MultiMesh_iskgq"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_5k2p6"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_dg30y"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_abcyi"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_26wnm"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_2i555"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_osud4"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_klcm1"]
+transform_format = 1
+use_colors = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_23mvp"]
+transform_format = 1
+use_colors = true
 
 [sub_resource type="Resource" id="Resource_86tiq"]
 script = ExtResource("3_1w6gs")
 mesh_data = ExtResource("3_w6kgi")
+multimesh_data_map = Dictionary[AABB, MultiMesh]({
+AABB(0, 0, 0, 20, 20, 20): SubResource("MultiMesh_rn1h8"),
+AABB(-20, 0, 0, 20, 20, 20): SubResource("MultiMesh_ehps6"),
+AABB(-40, 0, -20, 20, 20, 20): SubResource("MultiMesh_1wlv1"),
+AABB(-20, 0, -20, 20, 20, 20): SubResource("MultiMesh_puirh"),
+AABB(0, -20, 0, 20, 20, 20): SubResource("MultiMesh_xuq57"),
+AABB(0, 0, -20, 20, 20, 20): SubResource("MultiMesh_iskgq"),
+AABB(-20, -20, 0, 20, 20, 20): SubResource("MultiMesh_5k2p6"),
+AABB(-40, 0, -80, 20, 20, 20): SubResource("MultiMesh_dg30y"),
+AABB(-40, 0, -60, 20, 20, 20): SubResource("MultiMesh_abcyi"),
+AABB(-40, 0, -40, 20, 20, 20): SubResource("MultiMesh_26wnm"),
+AABB(-20, 0, -40, 20, 20, 20): SubResource("MultiMesh_2i555"),
+AABB(0, 0, -40, 20, 20, 20): SubResource("MultiMesh_osud4"),
+AABB(-20, -20, -40, 20, 20, 20): SubResource("MultiMesh_klcm1"),
+AABB(0, 0, -60, 20, 20, 20): SubResource("MultiMesh_23mvp")
+})
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_u2sx3"]
 radius = 8.0
@@ -60,6 +356,7 @@ directional_shadow_max_distance = 30.0
 script = ExtResource("1_xa4g1")
 data = Array[ExtResource("3_1w6gs")]([SubResource("Resource_h73uu"), SubResource("Resource_xrcgx"), SubResource("Resource_1flo6"), SubResource("Resource_86tiq")])
 metadata/_custom_type_script = "uid://be4lu3ug8donp"
+metadata/_edit_lock_ = true
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
 
