@@ -61,6 +61,24 @@ func update_group_buffer(data_group_list : Array[MMGroup]):
 		var buffer_map : Dictionary[AABB, PackedFloat32Array] = data_group.buffer_map
 		_update_buffer(data_group_idx, buffer_map)
 
+func _remove_buffer(data_group_idx : int, aabb : AABB):
+	var m_rid : RID = data[data_group_idx].multimesh_RID_map[aabb]
+	var i_rid : RID = data[data_group_idx].visual_instance_RID_map[aabb]
+	RenderingServer.free_rid(i_rid)
+	RenderingServer.free_rid(m_rid)
+	data[data_group_idx].visual_instance_RID_map.erase(aabb)
+	data[data_group_idx].multimesh_RID_map.erase(aabb)
+	data[data_group_idx].multimesh_data_map.erase(aabb)
+
+func check_missmatch(data_group_list : Array[MMGroup]):
+	for data_group_idx in data.size():
+		var local_data : Dictionary[AABB, MultiMesh] = data[data_group_idx].multimesh_data_map
+		var external_data : Dictionary[AABB, PackedFloat32Array] = data_group_list[data_group_idx].buffer_map
+		
+		for aabb in local_data:
+			if !external_data.has(aabb):
+				_remove_buffer(data_group_idx, aabb)
+
 func _update_buffer(data_group_idx : int, buffer_map : Dictionary[AABB, PackedFloat32Array]) -> void:
 	for aabb in buffer_map:
 		var buffer : PackedFloat32Array = buffer_map[aabb]
@@ -77,9 +95,11 @@ func _update_buffer(data_group_idx : int, buffer_map : Dictionary[AABB, PackedFl
 
 		if !buffer.is_empty():
 			RenderingServer.multimesh_set_buffer(m_rid, buffer)
+			multimesh.instance_count = buffer.size() / 16
+			multimesh.buffer = buffer
+		else:
+			_remove_buffer(data_group_idx, aabb)
 
-		multimesh.instance_count = buffer.size() / 16
-		multimesh.buffer = buffer
 
 func _exit_tree() -> void:
 	for data_group_idx in data.size():

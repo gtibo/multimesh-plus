@@ -6,12 +6,14 @@ Todo list
 [x] Placement based on distance rules
 [X] Brush Preview
 [X] Brush Size
+[X] Add undo / redo
+[] Fix data mismatch between editor and node when modifying data block
 [] instance spawn distance option
+[] instance base scale option
 [] Base UI
 [] Poisson disk sampling
 [] Probability based placement (e.g. 20% this and 80% that)
 [X] Paint Mode
 [X] Scale Mode
 [X] Color Mode
-[] Add undo / redo
 [] Add mm+ node Icon 

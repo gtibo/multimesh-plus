@@ -3,6 +3,7 @@ extends EditorPlugin
 
 var selected_node : MmPlus3D
 var data_group_list : Array[MMGroup] = []
+var _memory_data_group_list : Array[MMGroup] = []
 
 enum MODE {NONE, PAINT, SCALE, COLOR}
 var current_mode : MODE = MODE.NONE : set = _set_current_mode
@@ -126,7 +127,15 @@ func _edit(object) -> void:
 func _load_selected_node_data() -> void:
 	for data_group in selected_node.data:
 		var data : Dictionary[AABB, MultiMesh] = data_group.multimesh_data_map
-		data_group_list.append(MMGroup.new(data))
+		var group : MMGroup = MMGroup.new()
+		group.setup(data)
+		data_group_list.append(group)
+
+func _get_data_group_clone() -> Array[MMGroup]:
+	var result : Array[MMGroup] = []
+	for data in data_group_list:
+		result.append(data.duplicate())
+	return result
 
 func _forward_3d_gui_input(viewport_camera, event):
 	if current_mode == MODE.NONE: return EditorPlugin.AFTER_GUI_INPUT_PASS
@@ -134,6 +143,8 @@ func _forward_3d_gui_input(viewport_camera, event):
 	var is_left_click : bool = event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT && event.pressed
 	if !is_left_click: return EditorPlugin.AFTER_GUI_INPUT_PASS
 	return EditorPlugin.AFTER_GUI_INPUT_STOP
+
+var is_applying_action : bool = false
 
 func _check_paint_logic(viewport_camera, event) -> void:
 	var mouse_event : InputEventMouse = event as InputEventMouse
@@ -153,13 +164,22 @@ func _check_paint_logic(viewport_camera, event) -> void:
 	preview_mesh.transform = t
 
 	var is_left_click : bool = event.button_mask == MOUSE_BUTTON_LEFT
+
+	if is_applying_action != is_left_click:
+		is_applying_action = is_left_click
+		if is_applying_action:
+			_memory_data_group_list = _get_data_group_clone()
+		else:
+			_add_to_history()
+
 	if !is_left_click: return
+
 
 	match current_mode:
 		MODE.PAINT:
 			_apply_paint_mode(event, t)
 		MODE.SCALE:
-			_apply_transform_mode(event, t)
+			_apply_scale_mode(event, t)
 		MODE.COLOR:
 			_apply_color_mode(t)
 
@@ -172,7 +192,7 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 	else:
 		# Paint
 		for i in range(16):
-			var min_space_between_instances : float = 0.5
+			var min_space_between_instances : float = 2.0
 			var offset : Vector2 = _random_in_circle(brush_size)
 			var target = t.translated_local(Vector3(offset.x, 0.0, offset.y))
 			var overlap : bool = data_group_list.any(func(data_group : MMGroup): 
@@ -183,7 +203,7 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 
 	_update_selected_node_buffers()
 
-func _apply_transform_mode(event : InputEventMouse, t : Transform3D) -> void:
+func _apply_scale_mode(event : InputEventMouse, t : Transform3D) -> void:
 	var brush_size : float = brush_size_map[current_mode]
 
 	for data_group in data_group_list:
@@ -212,8 +232,24 @@ func _random_in_circle(radius : float = 1.0) -> Vector2:
 	var theta = randf() * TAU
 	return Vector2.from_angle(theta) * r
 
+func _add_to_history() -> void:
+	var do_prop : Array[MMGroup] = _get_data_group_clone()
+	var undo_prop : Array[MMGroup] = _memory_data_group_list
+
+	var undo_redo : EditorUndoRedoManager = get_undo_redo()
+	undo_redo.create_action("Update node buffers")
+	undo_redo.add_do_method(self, "_update_selected_node_buffers_history", do_prop)
+	undo_redo.add_undo_method(self, "_update_selected_node_buffers_history", undo_prop)
+	undo_redo.add_do_property(self, "data_group_list", do_prop)
+	undo_redo.add_undo_property(self, "data_group_list", undo_prop)
+	undo_redo.commit_action()
+
 func _update_selected_node_buffers() -> void:
 	selected_node.update_group_buffer(data_group_list)
+
+func _update_selected_node_buffers_history(data : Array[MMGroup]) -> void:
+	selected_node.update_group_buffer(data)
+	selected_node.check_missmatch(data)
 
 func _get_basis_from_normal(normal : Vector3) -> Basis:
 	var basis = Basis.IDENTITY

@@ -1,7 +1,7 @@
 class_name Octree
 extends Object
 
-var grid_size : Vector3 = Vector3.ONE * 20.0
+var grid_size : Vector3 = Vector3.ONE * 50.0
 var half_grid_size : Vector3 = grid_size * 0.5
 
 class IdPosList:
@@ -19,8 +19,23 @@ class IdPosList:
 		idx_list.remove_at(i)
 		position_list.remove_at(i)
 		count -= 1
+	
+	func duplicate() -> IdPosList:
+		var new_id_pos_list : IdPosList = IdPosList.new()
+		new_id_pos_list.count = count
+		new_id_pos_list.position_list = position_list.duplicate()
+		new_id_pos_list.idx_list = idx_list.duplicate()
+		return new_id_pos_list
 
 var region_map : Dictionary[AABB, IdPosList] = {}
+
+func duplicate() -> Octree:
+	var octree_clone : Octree = Octree.new()
+	var new_r_m : Dictionary[AABB, IdPosList] = {}
+	for aabb in region_map:
+		new_r_m[aabb] = region_map[aabb].duplicate()
+	octree_clone.region_map = new_r_m
+	return octree_clone
 
 func populate(aabb : AABB, points : PackedVector3Array) -> void:
 	var id_pos_list : IdPosList = IdPosList.new()

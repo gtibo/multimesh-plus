@@ -4,7 +4,16 @@ extends Object
 var octree : Octree
 var buffer_map : Dictionary[AABB, PackedFloat32Array] = {}
 
-func _init(data : Dictionary[AABB, MultiMesh]) -> void:
+func duplicate() -> MMGroup:
+	var group : MMGroup = MMGroup.new()
+	var new_buffer_map : Dictionary[AABB, PackedFloat32Array]
+	for aabb in buffer_map:
+		new_buffer_map[aabb] = buffer_map[aabb].duplicate()
+	group.buffer_map = new_buffer_map
+	group.octree = octree.duplicate()
+	return group
+
+func setup(data : Dictionary[AABB, MultiMesh]) -> void:
 	buffer_map = {}
 	octree = Octree.new()
 	for aabb in data:
