@@ -119,12 +119,22 @@ func _handles(object : Object) -> bool:
 func _edit(object) -> void:
 	var previous_selected_node : MmPlus3D = selected_node
 	selected_node = object
-	data_group_list = []
+
 	if selected_node != null:
 		_load_selected_node_data()
+		selected_node.data_changed.connect(_on_selected_node_data_changed)
+	
+	if previous_selected_node && previous_selected_node.data_changed.is_connected(_on_selected_node_data_changed):
+		previous_selected_node.data_changed.disconnect(_on_selected_node_data_changed)
+	
 	main_tool_bar.visible = selected_node != null
 
+# Reinit all the plugin on selected node data change, I'm too lazy to make something better right now
+func _on_selected_node_data_changed() -> void:
+	_load_selected_node_data()
+
 func _load_selected_node_data() -> void:
+	data_group_list = []
 	for data_group in selected_node.data:
 		var data : Dictionary[AABB, MultiMesh] = data_group.multimesh_data_map
 		var group : MMGroup = MMGroup.new()

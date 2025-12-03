@@ -8,7 +8,7 @@ Todo list
 [X] Brush Size
 [X] Add undo / redo
 [] Fix data mismatch between editor and node when modifying data block
-[] instance spawn distance option
+[X] instance spawn distance option
 [] instance base scale option
 [] Base UI
 [] Poisson disk sampling

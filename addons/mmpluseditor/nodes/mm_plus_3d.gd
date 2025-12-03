@@ -2,9 +2,32 @@
 class_name MmPlus3D
 extends Node3D
 
-@export var data : Array[MMPlusData]
+@export var data : Array[MMPlusData] : set = _set_data
 
 @export_tool_button("Delete All Transforms") var delete_all_transforms_actions = delete_all_transforms
+
+signal data_changed
+
+func _set_data(new_data : Array[MMPlusData]) -> void:
+	var previous_data : Array[MMPlusData] = data
+	data = new_data
+	data_changed.emit()
+	# Check signal on mesh data resource
+	for mmplus_data in data:
+		if mmplus_data == null: continue
+		if mmplus_data.mesh_data == null: continue
+		if !mmplus_data.mesh_data.changed.is_connected(data_changed.emit):
+			mmplus_data.mesh_data.changed.connect(data_changed.emit)
+
+	# Something was removed?
+	if (previous_data.size() - data.size()) == 1:
+		var idx : int = previous_data.find_custom(func(item : MMPlusData): return !data.has(item))
+		var removed_data : MMPlusData = previous_data[idx]
+		for aabb in removed_data.multimesh_data_map:
+			var m_rid : RID = removed_data.multimesh_RID_map[aabb]
+			RenderingServer.free_rid(m_rid)
+			var i_rid : RID = removed_data.visual_instance_RID_map[aabb]
+			RenderingServer.free_rid(i_rid)
 
 func _ready() -> void:
 	load_multimesh()
@@ -100,10 +123,14 @@ func _update_buffer(data_group_idx : int, buffer_map : Dictionary[AABB, PackedFl
 		else:
 			_remove_buffer(data_group_idx, aabb)
 
+func _enter_tree() -> void:
+	load_multimesh()
 
 func _exit_tree() -> void:
-	for data_group_idx in data.size():
+	flush()
 
+func flush() -> void:
+	for data_group_idx in data.size():
 		for aabb in data[data_group_idx].visual_instance_RID_map:
 			RenderingServer.free_rid(data[data_group_idx].visual_instance_RID_map[aabb])
 		data[data_group_idx].visual_instance_RID_map = {}
