@@ -192,13 +192,14 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 	else:
 		# Paint
 		for i in range(16):
-			var min_space_between_instances : float = 2.0
+			var data_group_idx : int = randi() % data_group_list.size()
+			var min_space_between_instances : float = selected_node.data[data_group_idx].mesh_data.spacing
 			var offset : Vector2 = _random_in_circle(brush_size)
 			var target = t.translated_local(Vector3(offset.x, 0.0, offset.y))
 			var overlap : bool = data_group_list.any(func(data_group : MMGroup): 
 				return data_group.octree.is_point_in_sphere(target.origin, min_space_between_instances))
 			if overlap: continue
-			var data_group : MMGroup = data_group_list[randi() % data_group_list.size()]
+			var data_group : MMGroup = data_group_list[data_group_idx]
 			data_group.add_transform_to_buffer(target)
 
 	_update_selected_node_buffers()

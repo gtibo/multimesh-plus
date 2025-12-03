@@ -7,8 +7,8 @@ albedo_color = Color(0.19, 0.5814998, 1, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_xa4g1"]
 material = SubResource("StandardMaterial3D_qox4d")
-size = Vector3(0.5, 0.5, 0.5)
 
 [resource]
 script = ExtResource("1_qox4d")
 mesh = SubResource("BoxMesh_xa4g1")
+spacing = 1.5
