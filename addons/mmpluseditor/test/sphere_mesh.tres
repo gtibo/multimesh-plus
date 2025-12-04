@@ -3,14 +3,16 @@
 [ext_resource type="Script" uid="uid://dre8v2iurryb6" path="res://addons/mmpluseditor/resources/mm_plus_mesh.gd" id="1_atkjo"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_atkjo"]
-albedo_color = Color(0.99016684, 0.41000003, 1, 1)
+vertex_color_use_as_albedo = true
+vertex_color_is_srgb = true
 
 [sub_resource type="SphereMesh" id="SphereMesh_xa4g1"]
 material = SubResource("StandardMaterial3D_atkjo")
-radius = 0.2
-height = 0.4
+radial_segments = 16
+rings = 8
 
 [resource]
 script = ExtResource("1_atkjo")
 name = &"Sphere"
 mesh = SubResource("SphereMesh_xa4g1")
+spacing = 1.0
