@@ -20,6 +20,8 @@ var brush_size_map : Dictionary[MODE, float] = {
 const BTN_THEME = preload("uid://b2b40e68ae13p")
 const SPHERE_MAT = preload("uid://d3ogk53yp2yvp")
 
+var active_layers : Array[bool] = []
+
 var main_tool_bar : HBoxContainer = null
 var color_tool_bar : HBoxContainer = null
 var color_picker : ColorPickerButton = null
@@ -27,6 +29,7 @@ var button_group : ButtonGroup = null
 var preview_mesh : MeshInstance3D = null
 var brush_size_box : SpinBox = null
 var randomize_color_button : Button = null
+var layers_popup_body : VBoxContainer = null
 
 func init_ui() -> void:
 	main_tool_bar = HBoxContainer.new()
@@ -34,14 +37,32 @@ func init_ui() -> void:
 	main_tool_bar.hide()
 	color_tool_bar.hide()
 	add_control_to_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_MENU, main_tool_bar)
-	var base_control = EditorInterface.get_base_control()
-	button_group = ButtonGroup.new()
+	var gui = EditorInterface.get_base_control()
+
+	# Layers popup
+	var layers_btn : Button = Button.new()
+	layers_btn.theme = BTN_THEME
+	layers_btn.text = "Layers"
+	layers_btn.icon = gui.get_theme_icon("GuiOptionArrow", "EditorIcons")
+
+	main_tool_bar.add_child(layers_btn)
+
+	var layers_popup : PopupPanel = PopupPanel.new()
+	layers_popup_body = VBoxContainer.new()
+	layers_popup.add_child(layers_popup_body)
+	main_tool_bar.add_child(layers_popup)
+
+	layers_btn.pressed.connect(func():
+		layers_popup.popup(Rect2i(layers_btn.get_screen_position() + Vector2(0.0, layers_btn.size.y), Vector2i.ONE))
+		)
+
 	# Create mode buttons
+	button_group = ButtonGroup.new()
 	for btn_id in btn_mode_map:
 		var btn : Button = Button.new()
 		btn.theme = BTN_THEME
 		btn.text = btn_mode_map[btn_id].title
-		btn.icon = base_control.get_theme_icon(btn_mode_map[btn_id].icon, "EditorIcons")
+		btn.icon = gui.get_theme_icon(btn_mode_map[btn_id].icon, "EditorIcons")
 		btn.button_group = button_group
 		btn.toggle_mode = true
 		btn.set_meta("ID", btn_id)
@@ -58,7 +79,6 @@ func init_ui() -> void:
 	preview_mesh.hide()
 
 	# Brush Size UI
-
 	brush_size_box = SpinBox.new()
 	main_tool_bar.add_child(brush_size_box)
 	brush_size_box.suffix = "m"
@@ -72,14 +92,14 @@ func init_ui() -> void:
 	color_tool_bar.add_child(color_picker)
 
 	randomize_color_button = Button.new()
-	randomize_color_button.icon = base_control.get_theme_icon("RandomNumberGenerator", "EditorIcons")
+	randomize_color_button.icon = gui.get_theme_icon("RandomNumberGenerator", "EditorIcons")
 	randomize_color_button.theme = BTN_THEME
 	randomize_color_button.toggle_mode = true
 	randomize_color_button.tooltip_text = "Randomize Color"
 	color_tool_bar.add_child(randomize_color_button)
 
-
 	main_tool_bar.add_child(color_tool_bar)
+
 
 func _set_current_mode(mode : MODE) -> void:
 	if current_mode == mode: return
@@ -122,19 +142,16 @@ func _edit(object) -> void:
 	var previous_selected_node : MmPlus3D = selected_node
 	selected_node = object
 
-	if selected_node && !selected_node.data_changed.is_connected(_on_selected_node_data_changed):
+	if selected_node && !selected_node.data_changed.is_connected(_load_selected_node_data):
 		_load_selected_node_data()
-		selected_node.data_changed.connect(_on_selected_node_data_changed)
+		selected_node.data_changed.connect(_load_selected_node_data)
 	
-	if previous_selected_node && previous_selected_node.data_changed.is_connected(_on_selected_node_data_changed):
-		previous_selected_node.data_changed.disconnect(_on_selected_node_data_changed)
+	if previous_selected_node && previous_selected_node.data_changed.is_connected(_load_selected_node_data):
+		previous_selected_node.data_changed.disconnect(_load_selected_node_data)
 	
 	main_tool_bar.visible = selected_node != null
 
 # Reinit all the plugin on selected node data change, I'm too lazy to make something better right now
-func _on_selected_node_data_changed() -> void:
-	_load_selected_node_data()
-
 func _load_selected_node_data() -> void:
 	data_group_list = []
 	for data_group in selected_node.data:
@@ -142,6 +159,26 @@ func _load_selected_node_data() -> void:
 		var group : MMGroup = MMGroup.new()
 		group.setup(data)
 		data_group_list.append(group)
+
+	_rebuild_layers_ui()
+
+func _rebuild_layers_ui() -> void:
+	active_layers = []
+	active_layers.resize(selected_node.data.size())
+	active_layers.fill(true)
+
+	for child in layers_popup_body.get_children():
+		child.queue_free()
+
+	for mmplus_data_idx in selected_node.data.size():
+		var mmplus_data : MMPlusData = selected_node.data[mmplus_data_idx]
+		var checkbox : CheckBox = CheckBox.new()
+		checkbox.text = mmplus_data.mesh_data.name
+		checkbox.button_pressed = true
+		layers_popup_body.add_child(checkbox)
+		checkbox.toggled.connect(func(toggled : bool) -> void:
+			active_layers[mmplus_data_idx] = toggled
+			)
 
 func _get_data_group_clone() -> Array[MMGroup]:
 	var result : Array[MMGroup] = []
@@ -199,12 +236,15 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 	var brush_size : float = brush_size_map[current_mode]
 	if event.shift_pressed:
 		# Erase
-		for data_group in data_group_list:
+		for data_group_idx in data_group_list.size():
+			if active_layers[data_group_idx] == false: continue
+			var data_group : MMGroup = data_group_list[data_group_idx]
 			data_group.remove_point_in_sphere(t.origin, brush_size)
 	else:
 		# Paint
 		for i in range(16):
 			var data_group_idx : int = randi() % data_group_list.size()
+			if active_layers[data_group_idx] == false: continue
 			var mesh_data : MMPlusMesh = selected_node.data[data_group_idx].mesh_data
 			var min_space_between_instances : float = mesh_data.spacing
 			var item_base_scale : float = mesh_data.base_scale
@@ -223,7 +263,10 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 func _apply_scale_mode(event : InputEventMouse, t : Transform3D) -> void:
 	var brush_size : float = brush_size_map[current_mode]
 
-	for data_group in data_group_list:
+	for data_group_idx in data_group_list.size():
+		if active_layers[data_group_idx] == false: continue
+		var data_group : MMGroup = data_group_list[data_group_idx]
+
 		var result : Dictionary[AABB, PackedInt64Array] = data_group.octree.get_points_in_sphere(t.origin, brush_size)
 
 		for aabb in result:
@@ -240,8 +283,11 @@ func _apply_scale_mode(event : InputEventMouse, t : Transform3D) -> void:
 
 func _apply_color_mode(t : Transform3D) -> void:
 	var brush_size : float = brush_size_map[current_mode]
-	for data_group in data_group_list:
-				data_group.set_buffer_color_in_sphere(t.origin, brush_size, color_picker.color, randomize_color_button.button_pressed)
+	for data_group_idx in data_group_list.size():
+		if active_layers[data_group_idx] == false: continue
+		var data_group : MMGroup = data_group_list[data_group_idx]
+
+		data_group.set_buffer_color_in_sphere(t.origin, brush_size, color_picker.color, randomize_color_button.button_pressed)
 	_update_selected_node_buffers()
 
 func _random_in_circle(radius : float = 1.0) -> Vector2:

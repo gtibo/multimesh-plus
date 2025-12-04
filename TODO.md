@@ -14,8 +14,11 @@ Todo list
 [X] Color Mode
 [X] Base UI
 [X] instance base scale option
+[X] Layer system (chose which group of items are affected by editing modes)
 [] Make data block more resilient to changes
 [] Poisson disk sampling
 [] Probability based placement (e.g. 20% this and 80% that)
-[] Add mm+ node Icon 
+[] Align on normal option
+[] Random rotate around Y axis option
+[] Add mm+ node Icon
 [] Update readme
