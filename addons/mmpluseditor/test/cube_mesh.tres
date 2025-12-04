@@ -3,10 +3,11 @@
 [ext_resource type="Script" uid="uid://dre8v2iurryb6" path="res://addons/mmpluseditor/resources/mm_plus_mesh.gd" id="1_qox4d"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qox4d"]
-albedo_color = Color(0.19, 0.5814998, 1, 1)
+albedo_color = Color(1, 0.7666667, 0, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_xa4g1"]
 material = SubResource("StandardMaterial3D_qox4d")
+size = Vector3(0.5, 4, 0.4)
 
 [resource]
 script = ExtResource("1_qox4d")
