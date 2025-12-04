@@ -205,13 +205,17 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 		# Paint
 		for i in range(16):
 			var data_group_idx : int = randi() % data_group_list.size()
-			var min_space_between_instances : float = selected_node.data[data_group_idx].mesh_data.spacing
+			var mesh_data : MMPlusMesh = selected_node.data[data_group_idx].mesh_data
+			var min_space_between_instances : float = mesh_data.spacing
+			var item_base_scale : float = mesh_data.base_scale
 			var offset : Vector2 = _random_in_circle(brush_size)
 			var target = t.translated_local(Vector3(offset.x, 0.0, offset.y))
 			var overlap : bool = data_group_list.any(func(data_group : MMGroup): 
 				return data_group.octree.is_point_in_sphere(target.origin, min_space_between_instances))
 			if overlap: continue
 			var data_group : MMGroup = data_group_list[data_group_idx]
+			if item_base_scale != 1.0:
+				target = target.scaled_local(Vector3.ONE * item_base_scale)
 			data_group.add_transform_to_buffer(target)
 
 	_update_selected_node_buffers()

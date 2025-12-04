@@ -12,4 +12,5 @@ height = 0.4
 
 [resource]
 script = ExtResource("1_atkjo")
+name = &"Sphere"
 mesh = SubResource("SphereMesh_xa4g1")

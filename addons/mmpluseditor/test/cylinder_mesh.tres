@@ -13,5 +13,6 @@ height = 1.0
 
 [resource]
 script = ExtResource("1_4vbhn")
+name = &"Cylinder"
 mesh = SubResource("CylinderMesh_xa4g1")
 spacing = 1.0

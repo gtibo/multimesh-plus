@@ -13,8 +13,8 @@ Todo list
 [X] Scale Mode
 [X] Color Mode
 [X] Base UI
+[X] instance base scale option
 [] Make data block more resilient to changes
-[] instance base scale option
 [] Poisson disk sampling
 [] Probability based placement (e.g. 20% this and 80% that)
 [] Add mm+ node Icon 

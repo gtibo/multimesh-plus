@@ -13,6 +13,7 @@ radial_segments = 8
 
 [resource]
 script = ExtResource("1_4vbhn")
+name = &"Cone"
 mesh = SubResource("CylinderMesh_h73uu")
 spacing = 2.0
 metadata/_custom_type_script = "uid://dre8v2iurryb6"
