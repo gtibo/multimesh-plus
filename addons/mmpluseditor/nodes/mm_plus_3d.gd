@@ -12,6 +12,7 @@ func _set_data(new_data : Array[MMPlusData]) -> void:
 	var previous_data : Array[MMPlusData] = data
 	data = new_data
 	data_changed.emit()
+	if !is_inside_tree(): return
 	# Check signal on mesh data resource
 	for mmplus_data in data:
 		if mmplus_data == null: continue
@@ -28,6 +29,10 @@ func _set_data(new_data : Array[MMPlusData]) -> void:
 			RenderingServer.free_rid(m_rid)
 			var i_rid : RID = removed_data.visual_instance_RID_map[aabb]
 			RenderingServer.free_rid(i_rid)
+
+	if previous_data != data:
+		flush()
+		load_multimesh()
 
 func _ready() -> void:
 	load_multimesh()

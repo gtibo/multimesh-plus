@@ -7,13 +7,15 @@ Todo list
 [X] Brush Preview
 [X] Brush Size
 [X] Add undo / redo
-[] Fix data mismatch between editor and node when modifying data block
+[X] Fix data mismatch between editor and node when modifying data block
 [X] instance spawn distance option
-[] instance base scale option
-[] Base UI
-[] Poisson disk sampling
-[] Probability based placement (e.g. 20% this and 80% that)
 [X] Paint Mode
 [X] Scale Mode
 [X] Color Mode
+[X] Base UI
+[] Make data block more resilient to changes
+[] instance base scale option
+[] Poisson disk sampling
+[] Probability based placement (e.g. 20% this and 80% that)
 [] Add mm+ node Icon 
+[] Update readme

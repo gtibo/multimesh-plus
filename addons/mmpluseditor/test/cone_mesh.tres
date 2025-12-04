@@ -9,9 +9,10 @@ albedo_color = Color(1, 0.70233333, 0.060000002, 1)
 material = SubResource("StandardMaterial3D_1flo6")
 top_radius = 0.0
 bottom_radius = 1.0
+radial_segments = 8
 
 [resource]
 script = ExtResource("1_4vbhn")
 mesh = SubResource("CylinderMesh_h73uu")
-spacing = 1.0
+spacing = 2.0
 metadata/_custom_type_script = "uid://dre8v2iurryb6"

@@ -52,6 +52,8 @@ func init_ui() -> void:
 	preview_mesh = MeshInstance3D.new()
 	get_tree().root.call_deferred("add_child", preview_mesh)
 	preview_mesh.mesh = SphereMesh.new()
+	preview_mesh.mesh.radial_segments = 32
+	preview_mesh.mesh.rings = 16
 	preview_mesh.material_override = SPHERE_MAT
 	preview_mesh.hide()
 
@@ -120,7 +122,7 @@ func _edit(object) -> void:
 	var previous_selected_node : MmPlus3D = selected_node
 	selected_node = object
 
-	if selected_node != null:
+	if selected_node && !selected_node.data_changed.is_connected(_on_selected_node_data_changed):
 		_load_selected_node_data()
 		selected_node.data_changed.connect(_on_selected_node_data_changed)
 	

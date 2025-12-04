@@ -11,4 +11,4 @@ material = SubResource("StandardMaterial3D_qox4d")
 [resource]
 script = ExtResource("1_qox4d")
 mesh = SubResource("BoxMesh_xa4g1")
-spacing = 1.5
+spacing = 2.0
