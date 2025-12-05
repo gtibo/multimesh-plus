@@ -1,7 +1,7 @@
 [gd_resource type="ShaderMaterial" load_steps=6 format=3 uid="uid://cojhtxb1xrv4a"]
 
-[ext_resource type="Shader" uid="uid://gcfpa4gmgfp3" path="res://assets/waving_mesh.gdshader" id="1_g7y43"]
-[ext_resource type="Texture2D" uid="uid://cm4yel55b7rrd" path="res://assets/flower_color.tres" id="2_61hpw"]
+[ext_resource type="Shader" uid="uid://gcfpa4gmgfp3" path="res://test/assets/materials/waving_mesh.gdshader" id="1_g7y43"]
+[ext_resource type="Texture2D" uid="uid://cm4yel55b7rrd" path="res://test/assets/materials/flower_color.tres" id="2_61hpw"]
 
 [sub_resource type="Gradient" id="Gradient_5xt6t"]
 

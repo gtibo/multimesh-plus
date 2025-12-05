@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="MMPlusMesh" load_steps=5 format=4 uid="uid://defvtpt5m55ok"]
 
-[ext_resource type="Material" uid="uid://cojhtxb1xrv4a" path="res://assets/flower_mat.tres" id="1_so3jm"]
-[ext_resource type="Script" uid="uid://dre8v2iurryb6" path="res://addons/mmpluseditor/resources/mm_plus_mesh.gd" id="2_ixv8x"]
+[ext_resource type="Material" uid="uid://cojhtxb1xrv4a" path="res://test/assets/materials/flower_mat.tres" id="1_so3jm"]
+[ext_resource type="Script" uid="uid://dre8v2iurryb6" path="res://addons/mm_plus_editor/resources/mm_plus_mesh.gd" id="2_ixv8x"]
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_w4g72"]
 _surfaces = [{

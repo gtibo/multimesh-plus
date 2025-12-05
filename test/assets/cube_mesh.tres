@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="MMPlusMesh" load_steps=4 format=3 uid="uid://cwldwmctr547x"]
 
-[ext_resource type="Script" uid="uid://dre8v2iurryb6" path="res://addons/mmpluseditor/resources/mm_plus_mesh.gd" id="1_qox4d"]
+[ext_resource type="Script" uid="uid://dre8v2iurryb6" path="res://addons/mm_plus_editor/resources/mm_plus_mesh.gd" id="1_qox4d"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qox4d"]
 albedo_color = Color(1, 0.7666667, 0, 1)

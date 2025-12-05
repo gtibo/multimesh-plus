@@ -1,6 +1,6 @@
 [gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://d3ogk53yp2yvp"]
 
-[ext_resource type="Shader" uid="uid://dtkr4t1lq30gk" path="res://addons/multimeshplus/mat/preview_sphere.gdshader" id="1_anccj"]
+[ext_resource type="Shader" uid="uid://dtkr4t1lq30gk" path="res://addons/mm_plus_editor/assets/materials/preview_sphere.gdshader" id="1_anccj"]
 
 [resource]
 render_priority = 0

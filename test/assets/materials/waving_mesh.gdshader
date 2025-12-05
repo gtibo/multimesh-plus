@@ -7,9 +7,9 @@ uniform float intensity = 0.25;
 uniform float waviness = 1.0;
 uniform float wind_speed = 0.025;
 
-#include "res://shared/shaders/rotate_x.gdshaderinc"
-#include "res://shared/shaders/rotate_y.gdshaderinc"
-#include "res://shared/shaders/rotate_z.gdshaderinc"
+#include "res://test/shared/shaders/rotate_x.gdshaderinc"
+#include "res://test/shared/shaders/rotate_y.gdshaderinc"
+#include "res://test/shared/shaders/rotate_z.gdshaderinc"
 
 void vertex() {
 	vec2 offset = NODE_POSITION_WORLD.xz * 0.05;

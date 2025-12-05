@@ -11,7 +11,6 @@ config_version=5
 [application]
 
 config/name="Multimesh Plus"
-run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.5", "Forward Plus")
 run/max_fps=60
 config/icon="res://icon.svg"
@@ -33,7 +32,7 @@ movie_writer/mjpeg_quality=1.0
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/mmpluseditor/plugin.cfg")
+enabled=PackedStringArray("res://addons/mm_plus_editor/plugin.cfg")
 
 [rendering]
 
