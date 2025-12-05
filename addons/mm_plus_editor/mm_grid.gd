@@ -1,4 +1,4 @@
-class_name Octree
+class_name MMGrid
 extends Object
 
 var grid_size : Vector3 = Vector3.ONE * 50.0
@@ -29,13 +29,13 @@ class IdPosList:
 
 var region_map : Dictionary[AABB, IdPosList] = {}
 
-func duplicate() -> Octree:
-	var octree_clone : Octree = Octree.new()
+func duplicate() -> MMGrid:
+	var mm_grid_clone : MMGrid = MMGrid.new()
 	var new_r_m : Dictionary[AABB, IdPosList] = {}
 	for aabb in region_map:
 		new_r_m[aabb] = region_map[aabb].duplicate()
-	octree_clone.region_map = new_r_m
-	return octree_clone
+	mm_grid_clone.region_map = new_r_m
+	return mm_grid_clone
 
 func populate(aabb : AABB, points : PackedVector3Array) -> void:
 	var id_pos_list : IdPosList = IdPosList.new()

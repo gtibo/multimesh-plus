@@ -17,8 +17,8 @@ var brush_size_map : Dictionary[MODE, float] = {
 	MODE.SCALE: 1.0,
 	MODE.COLOR: 1.0,
 }
-const BTN_THEME = preload("uid://b2b40e68ae13p")
-const SPHERE_MAT = preload("uid://d3ogk53yp2yvp")
+const BTN_THEME = preload("./assets/btn_theme.tres")
+const SPHERE_MAT = preload("./assets/materials/sphere_mat.tres")
 
 var active_layers : Array[bool] = []
 
@@ -251,7 +251,7 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 			var offset : Vector2 = _random_in_circle(brush_size)
 			var target = t.translated_local(Vector3(offset.x, 0.0, offset.y))
 			var overlap : bool = data_group_list.any(func(data_group : MMGroup): 
-				return data_group.octree.is_point_in_sphere(target.origin, min_space_between_instances))
+				return data_group.mm_grid.is_point_in_sphere(target.origin, min_space_between_instances))
 			if overlap: continue
 			var data_group : MMGroup = data_group_list[data_group_idx]
 			if item_base_scale != 1.0:
@@ -267,14 +267,14 @@ func _apply_scale_mode(event : InputEventMouse, t : Transform3D) -> void:
 		if active_layers[data_group_idx] == false: continue
 		var data_group : MMGroup = data_group_list[data_group_idx]
 
-		var result : Dictionary[AABB, PackedInt64Array] = data_group.octree.get_points_in_sphere(t.origin, brush_size)
+		var result : Dictionary[AABB, PackedInt64Array] = data_group.mm_grid.get_points_in_sphere(t.origin, brush_size)
 
 		for aabb in result:
 			for idx in result[aabb]:
 				if event.ctrl_pressed:
 					data_group.set_buffer_transform_scale(aabb, idx, 1.0)
 				else:
-					var point_position : Vector3 = data_group.octree.get_point_position(aabb, idx)
+					var point_position : Vector3 = data_group.mm_grid.get_point_position(aabb, idx)
 					var factor : float = (brush_size - point_position.distance_to(t.origin)) / brush_size
 					var scale_value : float = 0.1 * factor
 					data_group.increment_buffer_transform_scale(aabb, idx, -scale_value if event.shift_pressed else scale_value)

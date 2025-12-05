@@ -1,7 +1,7 @@
 class_name MMGroup
 extends Object
 
-var octree : Octree
+var mm_grid : MMGrid
 var buffer_map : Dictionary[AABB, PackedFloat32Array] = {}
 
 func duplicate() -> MMGroup:
@@ -10,12 +10,12 @@ func duplicate() -> MMGroup:
 	for aabb in buffer_map:
 		new_buffer_map[aabb] = buffer_map[aabb].duplicate()
 	group.buffer_map = new_buffer_map
-	group.octree = octree.duplicate()
+	group.mm_grid = mm_grid.duplicate()
 	return group
 
 func setup(data : Dictionary[AABB, MultiMesh]) -> void:
 	buffer_map = {}
-	octree = Octree.new()
+	mm_grid = MMGrid.new()
 	for aabb in data:
 		buffer_map[aabb] = data[aabb].buffer
 		var buffer : PackedFloat32Array = data[aabb].buffer
@@ -30,16 +30,16 @@ func setup(data : Dictionary[AABB, MultiMesh]) -> void:
 			)
 			points.append(point)
 
-		octree.populate(aabb, points)
+		mm_grid.populate(aabb, points)
 
 func remove_point_in_sphere(position : Vector3, radius : float = 1.0) -> void:
-	var result : Dictionary[AABB, PackedInt64Array] = octree.remove_points_in_sphere(position, radius)
+	var result : Dictionary[AABB, PackedInt64Array] = mm_grid.remove_points_in_sphere(position, radius)
 	for aabb in result:
 		remove_from_buffer_at_idx_list(aabb, result[aabb])
 
 func set_buffer_color_in_sphere(position : Vector3, radius : float = 1.0, base_color : Color = Color.BLACK, random_color : bool = false):
 
-	var result : Dictionary[AABB, PackedInt64Array] = octree.get_points_in_sphere(position, radius)
+	var result : Dictionary[AABB, PackedInt64Array] = mm_grid.get_points_in_sphere(position, radius)
 	for aabb in result:
 		for idx in result[aabb]:
 			idx *= 16
@@ -50,7 +50,7 @@ func set_buffer_color_in_sphere(position : Vector3, radius : float = 1.0, base_c
 			buffer_map[aabb][idx + 15] = color.a
 
 func add_transform_to_buffer(t : Transform3D) -> void:
-	var region : AABB = octree.check_region_for_point(t.origin)
+	var region : AABB = mm_grid.check_region_for_point(t.origin)
 
 	if !buffer_map.has(region):
 		buffer_map[region] = PackedFloat32Array()
@@ -60,7 +60,7 @@ func add_transform_to_buffer(t : Transform3D) -> void:
 		)
 	var idx : int = buffer_map[region].size() / 16 - 1
 
-	octree.add_point_in_region(region, idx, t.origin)
+	mm_grid.add_point_in_region(region, idx, t.origin)
 
 func remove_from_buffer_at_idx_list(aabb : AABB, idx_list : PackedInt64Array):
 	for idx in range(idx_list.size() - 1 , -1, -1):

@@ -18,7 +18,8 @@ Todo list
 [X] Update readme
 [] Add mm+ node Icon
 [] Make data block more resilient to changes
-[] Poisson disk sampling
-[] Probability based placement (e.g. 20% this and 80% that)
+[] Better placement (Poisson disk sampling?, Probability based placement (e.g. 20% this and 80% that))
 [] Align on normal option
 [] Random rotate around Y axis option
+[] Hide when MMPlus3D parent node is hidden
+[] Update transform when MMPlus3D parent node transform update
