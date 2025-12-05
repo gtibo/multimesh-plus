@@ -1,4 +1,5 @@
 @tool
+@icon("../assets/icons/mm_plus_3d_icon.svg")
 class_name MmPlus3D
 extends Node3D
 
