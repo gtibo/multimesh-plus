@@ -37,6 +37,27 @@ func _set_data(new_data : Array[MMPlusData]) -> void:
 
 func _ready() -> void:
 	load_multimesh()
+	set_notify_transform(true)
+
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_VISIBILITY_CHANGED:
+			_update_visual_instances_visibility()
+		NOTIFICATION_TRANSFORM_CHANGED:
+			_update_visual_instances_transform()
+
+func _update_visual_instances_visibility() -> void:
+	for data_group_idx in data.size():
+		var data_group : MMPlusData = data[data_group_idx]
+		for aabb in data_group.visual_instance_RID_map:
+			RenderingServer.instance_set_visible(data_group.visual_instance_RID_map[aabb], visible)
+
+
+func _update_visual_instances_transform() -> void:
+	for data_group_idx in data.size():
+		var data_group : MMPlusData = data[data_group_idx]
+		for aabb in data_group.visual_instance_RID_map:
+			RenderingServer.instance_set_transform(data_group.visual_instance_RID_map[aabb], global_transform)
 
 func delete_all_transforms() -> void:
 	for data_group_idx in data.size():
