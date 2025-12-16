@@ -270,11 +270,14 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 func _apply_scale_mode(event : InputEventMouse, t : Transform3D) -> void:
 	var brush_size : float = brush_size_map[current_mode]
 
+	#Added offset in the transform to account for it when scaling
 	for data_group_idx in data_group_list.size():
 		if active_layers[data_group_idx] == false: continue
 		var data_group : MMGroup = data_group_list[data_group_idx]
+		var mesh_data : MMPlusMesh = selected_node.data[data_group_idx].mesh_data
+		var scale_radius : float = brush_size + mesh_data.offset.length()
 
-		var result : Dictionary[AABB, PackedInt64Array] = data_group.mm_grid.get_points_in_sphere(t.origin, brush_size)
+		var result : Dictionary[AABB, PackedInt64Array] = data_group.mm_grid.get_points_in_sphere(t.origin, scale_radius)
 
 		for aabb in result:
 			for idx in result[aabb]:
@@ -282,19 +285,23 @@ func _apply_scale_mode(event : InputEventMouse, t : Transform3D) -> void:
 					data_group.set_buffer_transform_scale(aabb, idx, 1.0)
 				else:
 					var point_position : Vector3 = data_group.mm_grid.get_point_position(aabb, idx)
-					var factor : float = (brush_size - point_position.distance_to(t.origin)) / brush_size
+					var factor : float = (scale_radius - point_position.distance_to(t.origin)) / scale_radius
 					var scale_value : float = 0.1 * factor
 					data_group.increment_buffer_transform_scale(aabb, idx, -scale_value if event.shift_pressed else scale_value)
 
 	_update_selected_node_buffers()
+
 
 func _apply_color_mode(t : Transform3D) -> void:
 	var brush_size : float = brush_size_map[current_mode]
 	for data_group_idx in data_group_list.size():
 		if active_layers[data_group_idx] == false: continue
 		var data_group : MMGroup = data_group_list[data_group_idx]
+		#Updated to consider offset positions when applying color
+		var mesh_data : MMPlusMesh = selected_node.data[data_group_idx].mesh_data
+		var color_radius : float = brush_size + mesh_data.offset.length()
 
-		data_group.set_buffer_color_in_sphere(t.origin, brush_size, color_picker.color, randomize_color_button.button_pressed)
+		data_group.set_buffer_color_in_sphere(t.origin, color_radius, color_picker.color, randomize_color_button.button_pressed)
 	_update_selected_node_buffers()
 
 func _random_in_circle(radius : float = 1.0) -> Vector2:
