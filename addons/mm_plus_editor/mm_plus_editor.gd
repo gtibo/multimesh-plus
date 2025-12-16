@@ -239,7 +239,10 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 		for data_group_idx in data_group_list.size():
 			if active_layers[data_group_idx] == false: continue
 			var data_group : MMGroup = data_group_list[data_group_idx]
-			data_group.remove_point_in_sphere(t.origin, brush_size)
+			#Small update to account for the offset in the transform and allow erase to work
+			var mesh_data : MMPlusMesh = selected_node.data[data_group_idx].mesh_data
+			var erase_radius : float = brush_size + mesh_data.offset.length()
+			data_group.remove_point_in_sphere(t.origin, erase_radius)
 	else:
 		# Paint
 		for i in range(16):
@@ -253,9 +256,13 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 			var overlap : bool = data_group_list.any(func(data_group : MMGroup): 
 				return data_group.mm_grid.is_point_in_sphere(target.origin, min_space_between_instances))
 			if overlap: continue
+
+			#Added offset in the transform to account for it when paiting
 			var data_group : MMGroup = data_group_list[data_group_idx]
 			if item_base_scale != 1.0:
 				target = target.scaled_local(Vector3.ONE * item_base_scale)
+			if mesh_data.offset != Vector3.ZERO:
+				target = target.translated_local(mesh_data.offset)
 			data_group.add_transform_to_buffer(target)
 
 	_update_selected_node_buffers()

@@ -5,6 +5,7 @@ extends Resource
 @export var name : StringName = "" : set = _set_name
 @export var mesh : Mesh : set = _set_mesh
 @export var spacing : float = 0.5 : set = _set_spacing
+@export var offset : Vector3 = Vector3.ZERO : set = _set_offset #used to add a offset to the transform when painting
 @export_range(0.1, 10.0, 0.1, "or_greater") var base_scale : float = 1.0 : set = _set_base_scale
 
 func _set_name(new_name : StringName) -> void:
@@ -19,3 +20,7 @@ func _set_spacing(new_spacing : float) -> void:
 
 func _set_base_scale(new_scale : float) -> void:
 	base_scale = new_scale
+
+func _set_offset(new_offset: Vector3) -> void:
+	offset = new_offset
+	emit_changed()
