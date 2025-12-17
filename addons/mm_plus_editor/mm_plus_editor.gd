@@ -275,9 +275,10 @@ func _check_paint_logic(viewport_camera, event) -> void:
 	preview_mesh.visible = ray_cast_result != {}
 	if !ray_cast_result: return
 
-	var t : Transform3D = Transform3D(_get_basis_from_normal(ray_cast_result.normal), ray_cast_result.position)
+	var target_transform : Transform3D = Transform3D(_get_basis_from_normal(ray_cast_result.normal), ray_cast_result.position)
 
-	preview_mesh.transform = t
+	preview_mesh.transform = target_transform
+	target_transform = selected_node.global_transform.inverse() * target_transform
 
 	var is_left_click : bool = event.button_mask == MOUSE_BUTTON_LEFT
 
@@ -293,11 +294,11 @@ func _check_paint_logic(viewport_camera, event) -> void:
 
 	match current_mode:
 		MODE.PAINT:
-			_apply_paint_mode(event, t)
+			_apply_paint_mode(event, target_transform)
 		MODE.SCALE:
-			_apply_scale_mode(event, t)
+			_apply_scale_mode(event, target_transform)
 		MODE.COLOR:
-			_apply_color_mode(t)
+			_apply_color_mode(target_transform)
 
 func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 	var brush_size : float = brush_size_map[current_mode]

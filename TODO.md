@@ -19,7 +19,7 @@ Todo list
 [X] Add mm+ node Icon
 [X] Hide when MMPlus3D parent node is hidden
 [X] Update transform when MMPlus3D parent node transform update
-[] Fix placement on parent with non default transform
+[X] Fix placement on parent with translation or rotation applied
 [] Make data block more resilient to changes
 [] Better placement (Poisson disk sampling?, Probability based placement (e.g. 20% this and 80% that))
 [] Align on normal option
