@@ -98,17 +98,33 @@ func remove_points_in_sphere(position : Vector3, radius : float = 1.0) -> Dictio
 				result[aabb].append(id_pos_list.idx_list[i])
 		result[aabb].sort()
 
-
+	#Updated to a version that produces better performance results
 	for aabb in result:
+		var deleted_indices : PackedInt64Array = result[aabb]  # Already sorted ascending
 		var id_pos_list : IdPosList = region_map[aabb]
-		for r in range(result[aabb].size() -1, -1, -1):
-			var deleted_idx : int = result[aabb][r]
-			for i in range(id_pos_list.count -1, -1, -1):
-				var other_idx : int = id_pos_list.idx_list[i]
-				if other_idx > deleted_idx:
-					id_pos_list.idx_list[i] = other_idx - 1
-				if other_idx == deleted_idx:
-					id_pos_list.remove(other_idx)
+
+		# Build a hash set from deleted indices for O(1)
+		var deleted_set : Dictionary = {}
+		for idx in deleted_indices:
+			deleted_set[idx] = true
+
+		# Prepare new arrays to hold only the surviving (non-deleted) items
+		var new_idx_list : PackedInt64Array = PackedInt64Array()
+		var new_pos_list : PackedVector3Array = PackedVector3Array()
+
+		# Single pass through all items in this region
+		for i in id_pos_list.count:
+			var old_idx : int = id_pos_list.idx_list[i]
+			if not deleted_set.has(old_idx):
+				var decrement : int = deleted_indices.bsearch(old_idx)
+				# Add surviving item with its adjusted index
+				new_idx_list.append(old_idx - decrement)
+				new_pos_list.append(id_pos_list.position_list[i])
+
+		# Replace old arrays with the filtered/adjusted versions
+		id_pos_list.idx_list = new_idx_list
+		id_pos_list.position_list = new_pos_list
+		id_pos_list.count = new_idx_list.size()
 	return result
 
 func aabb_overlap_with_sphere(aabb : AABB, position, radius : float = 1.0) -> bool:

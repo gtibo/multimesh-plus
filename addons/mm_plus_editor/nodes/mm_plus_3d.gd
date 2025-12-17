@@ -73,6 +73,9 @@ func delete_all_transforms() -> void:
 
 		data_group.multimesh_data_map = {}
 
+	# Notify editor plugin to reload data.Without this, the old data persists in the editor 
+	data_changed.emit()
+
 func load_multimesh() -> void:
 	for group_idx in data.size():
 
