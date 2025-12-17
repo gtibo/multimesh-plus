@@ -20,6 +20,14 @@ var brush_size_map : Dictionary[MODE, float] = {
 const BTN_THEME = preload("./assets/btn_theme.tres")
 const SPHERE_MAT = preload("./assets/materials/sphere_mat.tres")
 
+# Brush size scroll shortcut settings
+const BRUSH_SCROLL_STEP_FINE : float = 0.2    # Step size below threshold
+const BRUSH_SCROLL_STEP_MACRO : float = 0.5  # Step size above threshold
+const BRUSH_SCROLL_THRESHOLD : float = 2.0    # Switch from fine to macro
+
+# Track 'S' key for brush size shortcut (Shift + S + Scroll)
+var _is_s_key_pressed : bool = false
+
 var active_layers : Array[bool] = []
 
 var main_tool_bar : HBoxContainer = null
@@ -104,6 +112,7 @@ func init_ui() -> void:
 func _set_current_mode(mode : MODE) -> void:
 	if current_mode == mode: return
 	current_mode = mode
+	_is_s_key_pressed = false  # Reset shortcut state
 
 	if current_mode != MODE.NONE:
 		brush_size_box.set_value_no_signal(brush_size_map[current_mode])
@@ -120,6 +129,53 @@ func _on_brush_size_value_changed(value : float) -> void:
 	if current_mode == MODE.NONE: return
 	brush_size_map[current_mode] = value
 	_update_brush_preview_size()
+
+# Check if scroll event should be consumed (Shift + S held during scroll)
+func _should_consume_scroll_event(event : InputEvent) -> bool:
+	if !event is InputEventMouseButton: return false
+	var mouse_btn : InputEventMouseButton = event as InputEventMouseButton
+	if mouse_btn.button_index != MOUSE_BUTTON_WHEEL_UP and mouse_btn.button_index != MOUSE_BUTTON_WHEEL_DOWN:
+		return false
+	return mouse_btn.shift_pressed and _is_s_key_pressed
+
+# Check if brush size change should be applied (only on pressed, not released)
+func _should_apply_brush_size_scroll(event : InputEvent) -> bool:
+	if !_should_consume_scroll_event(event): return false
+	return (event as InputEventMouseButton).pressed
+
+# Apply brush size change from scroll wheel using fine/coarse steps
+func _apply_brush_size_scroll(event : InputEventMouseButton) -> void:
+	var current_size : float = brush_size_map[current_mode]
+	var new_size : float
+	var is_scroll_up : bool = event.button_index == MOUSE_BUTTON_WHEEL_UP
+
+	var is_fine_range : bool = current_size < BRUSH_SCROLL_THRESHOLD or \
+		(current_size == BRUSH_SCROLL_THRESHOLD and !is_scroll_up)
+
+	if is_fine_range:
+		# Fine control: small step increments
+		if is_scroll_up:
+			# Round up to next fine step boundary
+			var steps_per_unit : float = 1.0 / BRUSH_SCROLL_STEP_FINE
+			new_size = ceilf(current_size * steps_per_unit) / steps_per_unit
+			if is_equal_approx(new_size, current_size):
+				new_size += BRUSH_SCROLL_STEP_FINE
+		else:
+			new_size = current_size - BRUSH_SCROLL_STEP_FINE
+	else:
+		# Coarse control: large step increments
+		if is_scroll_up:
+			new_size = current_size + BRUSH_SCROLL_STEP_MACRO
+		else:
+			# Step down, snap to threshold when crossing
+			new_size = current_size - BRUSH_SCROLL_STEP_MACRO
+			if new_size < BRUSH_SCROLL_THRESHOLD:
+				new_size = BRUSH_SCROLL_THRESHOLD
+
+	# Enforce minimum bound from SpinBox
+	new_size = maxf(new_size, brush_size_box.min_value)
+	# Update via SpinBox to trigger _on_brush_size_value_changed and keep UI in sync
+	brush_size_box.value = new_size
 
 func _on_button_group_press(_pressed_button : BaseButton):
 	var btn : BaseButton = button_group.get_pressed_button()
@@ -187,7 +243,18 @@ func _get_data_group_clone() -> Array[MMGroup]:
 	return result
 
 func _forward_3d_gui_input(viewport_camera, event):
+	# Track 'S' key state for brush size shortcut
+	if event is InputEventKey and event.keycode == KEY_S:
+		_is_s_key_pressed = event.pressed
+
 	if current_mode == MODE.NONE: return EditorPlugin.AFTER_GUI_INPUT_PASS
+
+	# Brush size shortcut: Shift + S + Scroll (consume event to prevent viewport zoom)
+	if _should_consume_scroll_event(event):
+		if _should_apply_brush_size_scroll(event):
+			_apply_brush_size_scroll(event)
+		return EditorPlugin.AFTER_GUI_INPUT_STOP
+
 	_check_paint_logic(viewport_camera, event)
 	var is_left_click : bool = event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT && event.pressed
 	if !is_left_click: return EditorPlugin.AFTER_GUI_INPUT_PASS
