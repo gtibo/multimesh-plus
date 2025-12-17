@@ -235,14 +235,12 @@ func _check_paint_logic(viewport_camera, event) -> void:
 func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 	var brush_size : float = brush_size_map[current_mode]
 	if event.shift_pressed:
-		# Erase
+		# Erase - uses brush_size directly since grid stores base positions (without offset)
+		# This creates intuitive cylinder-shaped erase behavior
 		for data_group_idx in data_group_list.size():
 			if active_layers[data_group_idx] == false: continue
 			var data_group : MMGroup = data_group_list[data_group_idx]
-			#Small update to account for the offset in the transform and allow erase to work
-			var mesh_data : MMPlusMesh = selected_node.data[data_group_idx].mesh_data
-			var erase_radius : float = brush_size + mesh_data.offset.length()
-			data_group.remove_point_in_sphere(t.origin, erase_radius)
+			data_group.remove_point_in_sphere(t.origin, brush_size)
 	else:
 		# Paint
 		for i in range(16):
@@ -259,25 +257,29 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 
 			#Added offset in the transform to account for it when paiting
 			var data_group : MMGroup = data_group_list[data_group_idx]
+			# Capture base position BEFORE applying any transforms
+			# This is the logical placement position used for spatial queries
+			var base_position : Vector3 = target.origin
 			if item_base_scale != 1.0:
 				target = target.scaled_local(Vector3.ONE * item_base_scale)
+			# Apply visual offset to the transform (for rendering)
 			if mesh_data.offset != Vector3.ZERO:
 				target = target.translated_local(mesh_data.offset)
-			data_group.add_transform_to_buffer(target)
+			# Pass both: target (visual) and base_position (logical)
+			data_group.add_transform_to_buffer(target, base_position)
 
 	_update_selected_node_buffers()
 
 func _apply_scale_mode(event : InputEventMouse, t : Transform3D) -> void:
 	var brush_size : float = brush_size_map[current_mode]
 
-	#Added offset in the transform to account for it when scaling
+	# Scale uses brush_size directly since grid stores base positions (without offset)
 	for data_group_idx in data_group_list.size():
 		if active_layers[data_group_idx] == false: continue
 		var data_group : MMGroup = data_group_list[data_group_idx]
-		var mesh_data : MMPlusMesh = selected_node.data[data_group_idx].mesh_data
-		var scale_radius : float = brush_size + mesh_data.offset.length()
 
-		var result : Dictionary[AABB, PackedInt64Array] = data_group.mm_grid.get_points_in_sphere(t.origin, scale_radius)
+		# Query grid using brush_size - grid has logical positions
+		var result : Dictionary[AABB, PackedInt64Array] = data_group.mm_grid.get_points_in_sphere(t.origin, brush_size)
 
 		for aabb in result:
 			for idx in result[aabb]:
@@ -285,7 +287,8 @@ func _apply_scale_mode(event : InputEventMouse, t : Transform3D) -> void:
 					data_group.set_buffer_transform_scale(aabb, idx, 1.0)
 				else:
 					var point_position : Vector3 = data_group.mm_grid.get_point_position(aabb, idx)
-					var factor : float = (scale_radius - point_position.distance_to(t.origin)) / scale_radius
+					# Factor calculation uses brush_size (grid has base positions)
+					var factor : float = (brush_size - point_position.distance_to(t.origin)) / brush_size
 					var scale_value : float = 0.1 * factor
 					data_group.increment_buffer_transform_scale(aabb, idx, -scale_value if event.shift_pressed else scale_value)
 
@@ -294,14 +297,12 @@ func _apply_scale_mode(event : InputEventMouse, t : Transform3D) -> void:
 
 func _apply_color_mode(t : Transform3D) -> void:
 	var brush_size : float = brush_size_map[current_mode]
+	# Colorize uses brush_size directly since grid stores base positions (without offset)
 	for data_group_idx in data_group_list.size():
 		if active_layers[data_group_idx] == false: continue
 		var data_group : MMGroup = data_group_list[data_group_idx]
-		#Updated to consider offset positions when applying color
-		var mesh_data : MMPlusMesh = selected_node.data[data_group_idx].mesh_data
-		var color_radius : float = brush_size + mesh_data.offset.length()
-
-		data_group.set_buffer_color_in_sphere(t.origin, color_radius, color_picker.color, randomize_color_button.button_pressed)
+		# Query uses brush_size - grid has logical positions
+		data_group.set_buffer_color_in_sphere(t.origin, brush_size, color_picker.color, randomize_color_button.button_pressed)
 	_update_selected_node_buffers()
 
 func _random_in_circle(radius : float = 1.0) -> Vector2:

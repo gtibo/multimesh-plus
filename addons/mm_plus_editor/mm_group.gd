@@ -49,18 +49,24 @@ func set_buffer_color_in_sphere(position : Vector3, radius : float = 1.0, base_c
 			buffer_map[aabb][idx + 14] = color.b
 			buffer_map[aabb][idx + 15] = color.a
 
-func add_transform_to_buffer(t : Transform3D) -> void:
-	var region : AABB = mm_grid.check_region_for_point(t.origin)
+# Updated: Now accepts base_position separately from transform
+# This separation fixes spacing and erase radius issues when offset is used
+func add_transform_to_buffer(t : Transform3D, base_position : Vector3) -> void:
+	# Use base_position for grid region lookup (logical position)
+	var region : AABB = mm_grid.check_region_for_point(base_position)
 
 	if !buffer_map.has(region):
 		buffer_map[region] = PackedFloat32Array()
 
+	# Buffer stores the visual transform (t) with offset for correct rendering
 	buffer_map[region].append_array(
 		[t.basis.x.x, t.basis.y.x, t.basis.z.x, t.origin.x, t.basis.x.y, t.basis.y.y, t.basis.z.y, t.origin.y, t.basis.x.z, t.basis.y.z, t.basis.z.z, t.origin.z, randf(), randf(), randf(), 1.0]
 		)
 	var idx : int = buffer_map[region].size() / 16 - 1
 
-	mm_grid.add_point_in_region(region, idx, t.origin)
+	# Grid stores base_position (without offset) for spatial queries
+	# This ensures erase/scale/colorize work on logical brush positions
+	mm_grid.add_point_in_region(region, idx, base_position)
 
 func remove_from_buffer_at_idx_list(aabb : AABB, idx_list : PackedInt64Array):
 	for idx in range(idx_list.size() - 1 , -1, -1):
