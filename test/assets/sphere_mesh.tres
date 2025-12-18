@@ -17,3 +17,4 @@ name = &"Sphere"
 mesh = SubResource("SphereMesh_xa4g1")
 spacing = 1.0
 probability = 0.2
+rotation_mode = null

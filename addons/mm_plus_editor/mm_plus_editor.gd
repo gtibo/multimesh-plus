@@ -4,6 +4,8 @@ extends EditorPlugin
 var selected_node : MmPlus3D
 var data_group_list : Array[MMGroup] = []
 var _memory_data_group_list : Array[MMGroup] = []
+var is_applying_action : bool = false
+var previous_target_transform : Transform3D = Transform3D.IDENTITY
 
 var rnd : RandomNumberGenerator = RandomNumberGenerator.new()
 
@@ -262,18 +264,13 @@ func _forward_3d_gui_input(viewport_camera, event):
 	if !is_left_click: return EditorPlugin.AFTER_GUI_INPUT_PASS
 	return EditorPlugin.AFTER_GUI_INPUT_STOP
 
-var is_applying_action : bool = false
-
 func _check_paint_logic(viewport_camera, event) -> void:
 	var mouse_event : InputEventMouse = event as InputEventMouse
 	if !mouse_event: return
 
-	var space_state : PhysicsDirectSpaceState3D = viewport_camera.get_world_3d().direct_space_state
-	var query = PhysicsRayQueryParameters3D.create(
-		viewport_camera.global_position,
-		viewport_camera.global_position + viewport_camera.project_ray_normal(event.position) * 100.0
-		)
-	var ray_cast_result = space_state.intersect_ray(query)
+	var ray_cast_start : Vector3 = viewport_camera.global_position
+	var ray_cast_end : Vector3 = viewport_camera.global_position + viewport_camera.project_ray_normal(event.position) * 100.0
+	var ray_cast_result = _ray_cast(ray_cast_start, ray_cast_end)
 	preview_mesh.visible = ray_cast_result != {}
 	if !ray_cast_result: return
 
@@ -301,6 +298,8 @@ func _check_paint_logic(viewport_camera, event) -> void:
 			_apply_scale_mode(event, target_transform)
 		MODE.COLOR:
 			_apply_color_mode(target_transform)
+	
+	previous_target_transform = target_transform
 
 func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 	var brush_size : float = brush_size_map[current_mode]
@@ -317,18 +316,24 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 			var weights : Array = selected_node.data.map(func(group: MMPlusData): return group.mesh_data.probability)
 			var data_group_idx : int = rnd.rand_weighted(weights)
 			if active_layers[data_group_idx] == false: continue
+			var mesh_data : MMPlusMesh = selected_node.data[data_group_idx].mesh_data
 
 			var circle_offset : Vector2 = _random_in_circle(brush_size)
 			var target = t.translated_local(Vector3(circle_offset.x, 0.0, circle_offset.y))
-			
+
 			# Reproject the target onto the surface, as it is now displaced relative to the base target.
 			var ray_cast_result = _ray_cast(target.origin + target.basis.y, target.origin - target.basis.y)
 			if ray_cast_result == {}:
 				continue
-			target = Transform3D(_get_basis_from_normal(ray_cast_result.normal), ray_cast_result.position)
+
+			var instance_basis : Basis = (
+				_get_basis_from_normal(ray_cast_result.normal)
+				if mesh_data.align_on_surface_normal
+				else Basis.IDENTITY)
+
+			target = Transform3D(instance_basis, ray_cast_result.position)
 
 			# Check if target position is not too close to other already spawned instances.
-			var mesh_data : MMPlusMesh = selected_node.data[data_group_idx].mesh_data
 			var min_space_between_instances : float = mesh_data.spacing
 			var overlap : bool = data_group_list.any(func(data_group : MMGroup): 
 				return data_group.mm_grid.is_point_in_sphere(target.origin, min_space_between_instances))
@@ -346,6 +351,16 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 			# Apply visual offset to the transform (for rendering)
 			if mesh_data.offset != Vector3.ZERO:
 				target = target.translated_local(mesh_data.offset)
+
+			match mesh_data.rotation_mode:
+				MMPlusMesh.RotationMode.RANDOM_Y_AXIS:
+					target.rotated_local(Vector3.UP, randf() * TAU)
+				MMPlusMesh.RotationMode.ALIGN_BRUSH_DIR:
+					var tangent : Vector3 = previous_target_transform.origin.direction_to(t.origin)
+					var look_at_target : Vector3 = target.origin + tangent
+					if target.origin != look_at_target:
+						target = target.looking_at(target.origin + tangent, target.basis.y, true)
+
 			# Pass both: target (visual) and base_position (logical)
 			data_group.add_transform_to_buffer(target, base_position)
 

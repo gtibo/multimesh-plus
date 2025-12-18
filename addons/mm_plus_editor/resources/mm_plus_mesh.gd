@@ -14,6 +14,19 @@ extends Resource
 ## from 0.0 (never) to 1.0 (always).
 @export_range(0.0, 1.0, 0.01) var probability : float = 1.0
 
+@export var align_on_surface_normal : bool = true
+
+enum RotationMode {
+	## No rotation mode.
+	NONE,
+	## The instance is randomly rotated around the UP axis.
+	RANDOM_Y_AXIS,
+	## The forward axis of the instance is aligned with the direction of the brush.
+	ALIGN_BRUSH_DIR
+}
+
+@export var rotation_mode : RotationMode = RotationMode.NONE
+
 func _set_name(new_name : StringName) -> void:
 	name = new_name
 

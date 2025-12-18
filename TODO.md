@@ -46,9 +46,11 @@ Todo list
 
 [] Better placement (Poisson disk sampling?).
 
-[] Align on normal option.
+[X] Align on normal option.
 
-[] Random rotate around Y axis option.
+[X] Align on brush direction option.
+
+[X] Random rotate around Y axis option.
 
 [] Grid Size option.
 
