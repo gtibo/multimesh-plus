@@ -16,3 +16,4 @@ script = ExtResource("1_atkjo")
 name = &"Sphere"
 mesh = SubResource("SphereMesh_xa4g1")
 spacing = 1.0
+probability = 0.2

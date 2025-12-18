@@ -40,9 +40,11 @@ Todo list
 
 [X] Fix placement on parent with translation or rotation applied
 
+[X] Probability based placement.
+
 [] Make data block more resilient to changes.
 
-[] Better placement (Poisson disk sampling?, Probability based placement (e.g. 20% this and 80% that)).
+[] Better placement (Poisson disk sampling?).
 
 [] Align on normal option.
 

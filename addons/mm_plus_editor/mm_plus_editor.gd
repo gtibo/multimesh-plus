@@ -5,6 +5,8 @@ var selected_node : MmPlus3D
 var data_group_list : Array[MMGroup] = []
 var _memory_data_group_list : Array[MMGroup] = []
 
+var rnd : RandomNumberGenerator = RandomNumberGenerator.new()
+
 enum MODE {NONE, PAINT, SCALE, COLOR}
 var current_mode : MODE = MODE.NONE : set = _set_current_mode
 const btn_mode_map : Dictionary[MODE, Dictionary] = {
@@ -312,22 +314,33 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 	else:
 		# Paint
 		for i in range(16):
-			var data_group_idx : int = randi() % data_group_list.size()
+			var weights : Array = selected_node.data.map(func(group: MMPlusData): return group.mesh_data.probability)
+			var data_group_idx : int = rnd.rand_weighted(weights)
 			if active_layers[data_group_idx] == false: continue
+
+			var circle_offset : Vector2 = _random_in_circle(brush_size)
+			var target = t.translated_local(Vector3(circle_offset.x, 0.0, circle_offset.y))
+			
+			# Reproject the target onto the surface, as it is now displaced relative to the base target.
+			var ray_cast_result = _ray_cast(target.origin + target.basis.y, target.origin - target.basis.y)
+			if ray_cast_result == {}:
+				continue
+			target = Transform3D(_get_basis_from_normal(ray_cast_result.normal), ray_cast_result.position)
+
+			# Check if target position is not too close to other already spawned instances.
 			var mesh_data : MMPlusMesh = selected_node.data[data_group_idx].mesh_data
 			var min_space_between_instances : float = mesh_data.spacing
-			var item_base_scale : float = mesh_data.base_scale
-			var offset : Vector2 = _random_in_circle(brush_size)
-			var target = t.translated_local(Vector3(offset.x, 0.0, offset.y))
 			var overlap : bool = data_group_list.any(func(data_group : MMGroup): 
 				return data_group.mm_grid.is_point_in_sphere(target.origin, min_space_between_instances))
-			if overlap: continue
+			if overlap:
+				continue
 
 			#Added offset in the transform to account for it when paiting
 			var data_group : MMGroup = data_group_list[data_group_idx]
 			# Capture base position BEFORE applying any transforms
 			# This is the logical placement position used for spatial queries
 			var base_position : Vector3 = target.origin
+			var item_base_scale : float = mesh_data.base_scale
 			if item_base_scale != 1.0:
 				target = target.scaled_local(Vector3.ONE * item_base_scale)
 			# Apply visual offset to the transform (for rendering)
@@ -403,3 +416,10 @@ func _get_basis_from_normal(normal : Vector3) -> Basis:
 	if normal.abs() != basis.z.abs(): basis.x = -basis.z.cross(normal)
 	else: basis.z = basis.x.cross(normal)
 	return basis.orthonormalized()
+
+func _ray_cast(start : Vector3, end : Vector3) -> Dictionary:
+	if selected_node == null: return {}
+	var space_state : PhysicsDirectSpaceState3D = selected_node.get_world_3d().direct_space_state
+	var query = PhysicsRayQueryParameters3D.create(start, end)
+	var ray_cast_result = space_state.intersect_ray(query)
+	return ray_cast_result
