@@ -35,6 +35,12 @@ Use `left click + CTRL` to restore to base scale.
 
 Use `left click` to apply the selected color to items, and use the randomize toggle to randomize the applied color.
 
+### Shortcuts
+
+#### Brush size shortcut
+
+`left shift + S + mouse scroll wheel` to increase or decrease the current mode brush size.
+
 ### Known Issues
 
 - A mismatch between the `MultiMeshPlus3D` node data block and the plugin can happen.
