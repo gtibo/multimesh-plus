@@ -354,7 +354,7 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 
 			match mesh_data.rotation_mode:
 				MMPlusMesh.RotationMode.RANDOM_Y_AXIS:
-					target.rotated_local(Vector3.UP, randf() * TAU)
+					target = target.rotated_local(Vector3.UP, randf() * TAU)
 				MMPlusMesh.RotationMode.ALIGN_BRUSH_DIR:
 					var tangent : Vector3 = previous_target_transform.origin.direction_to(t.origin)
 					var look_at_target : Vector3 = target.origin + tangent
