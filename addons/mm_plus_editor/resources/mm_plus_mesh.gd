@@ -4,6 +4,7 @@ extends Resource
 
 @export var name : StringName = "" : set = _set_name
 @export var mesh : Mesh : set = _set_mesh
+@export var cast_shadow : RenderingServer.ShadowCastingSetting = RenderingServer.ShadowCastingSetting.SHADOW_CASTING_SETTING_ON : set = _set_shadow_cast
 ## Minimum space between this instance and another to avoid any overlap.
 @export var spacing : float = 0.5 : set = _set_spacing
 ## Offset applied to the transformation of the instance during placement.
@@ -32,6 +33,10 @@ func _set_name(new_name : StringName) -> void:
 
 func _set_mesh(new_mesh : Mesh) -> void:
 	mesh = new_mesh
+	emit_changed()
+
+func _set_shadow_cast(new_shadow_cast : RenderingServer.ShadowCastingSetting) -> void:
+	cast_shadow = new_shadow_cast
 	emit_changed()
 
 func _set_spacing(new_spacing : float) -> void:
