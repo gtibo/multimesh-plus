@@ -92,12 +92,14 @@ func load_multimesh() -> void:
 		_update_buffer(group_idx, buffer_map)
 
 func _add_visual_instance(group_idx : int, aabb : AABB) -> void:
-	var mesh : Mesh = data[group_idx].mesh_data.mesh
+	var mesh_data : MMPlusMesh = data[group_idx].mesh_data
+	var mesh : Mesh = mesh_data.mesh
 	var m_rid = RenderingServer.multimesh_create()
 	var i_rid : RID = RenderingServer.instance_create2(m_rid, get_world_3d().scenario)
 	RenderingServer.instance_set_transform(i_rid, global_transform)
 	RenderingServer.instance_set_custom_aabb(i_rid, aabb)
 	RenderingServer.multimesh_set_mesh(m_rid, mesh.get_rid())
+	RenderingServer.instance_geometry_set_cast_shadows_setting(i_rid, mesh_data.cast_shadow)
 	RenderingServer.instance_geometry_set_visibility_range(i_rid, 0.0, 100.0, 0.0, 0.0, RenderingServer.VISIBILITY_RANGE_FADE_DISABLED)
 	RenderingServer.instance_set_visible(i_rid, visible)
 	data[group_idx].multimesh_RID_map[aabb] = m_rid
