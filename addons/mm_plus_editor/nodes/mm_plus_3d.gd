@@ -99,6 +99,7 @@ func _add_visual_instance(group_idx : int, aabb : AABB) -> void:
 	RenderingServer.instance_set_custom_aabb(i_rid, aabb)
 	RenderingServer.multimesh_set_mesh(m_rid, mesh.get_rid())
 	RenderingServer.instance_geometry_set_visibility_range(i_rid, 0.0, 100.0, 0.0, 0.0, RenderingServer.VISIBILITY_RANGE_FADE_DISABLED)
+	RenderingServer.instance_set_visible(i_rid, visible)
 	data[group_idx].multimesh_RID_map[aabb] = m_rid
 	data[group_idx].visual_instance_RID_map[aabb] = i_rid
 
