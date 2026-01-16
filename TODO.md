@@ -50,16 +50,16 @@
 
 - [x] Collision mask option for instance placement
 
-- [] Make data block more resilient to changes.
+- [ ] Make data block more resilient to changes.
 
-- [] Better placement (Poisson disk sampling?).
+- [ ] Better placement (Poisson disk sampling?).
 
-- [] Grid Size option.
+- [ ] Grid Size option.
 
 By default, MMgrid will partition the space into a grid with cells that are 50 in size.
 
-- [] Spread in volume / spread on surface option.
+- [ ] Spread in volume / spread on surface option.
 
-- [] Custom vertex color / custom data option.
+- [ ] Custom vertex color / custom data option.
 
 Currently, the plugin expect all multimesh to use the color option (storing 16 floats per instance by default in the buffer), but we should be able to switch between, transform only, transform + vertex color, and transform + vertex color + custom data.
