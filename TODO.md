@@ -1,63 +1,65 @@
-Todo list
+### Todo list
 
-[x] Draw / Erase instances
+- [x] Draw / Erase instances
 
-[x] Simple grid spatial partitioning
+- [x] Simple grid spatial partitioning
 
-[x] Edit multiple mesh groups simultaneously
+- [x] Edit multiple mesh groups simultaneously
 
-[x] Placement based on distance rules
+- [x] Placement based on distance rules
 
-[X] Brush Preview
+- [x] Brush Preview
 
-[X] Brush Size
+- [x] Brush Size
 
-[X] Add undo / redo
+- [x] Add undo / redo
 
-[X] Fix data mismatch between editor and node when modifying data block
+- [x] Fix data mismatch between editor and node when modifying data block
 
-[X] instance spawn distance option
+- [x] instance spawn distance option
 
-[X] Paint Mode
+- [x] Paint Mode
 
-[X] Scale Mode
+- [x] Scale Mode
 
-[X] Color Mode
+- [x] Color Mode
 
-[X] Base UI
+- [x] Base UI
 
-[X] instance base scale option
+- [x] instance base scale option
 
-[X] Layer system (chose which group of items are affected by editing modes)
+- [x] Layer system (chose which group of items are affected by editing modes)
 
-[X] Update readme
+- [x] Update readme
 
-[X] Add mm+ node Icon
+- [x] Add mm+ node Icon
 
-[X] Hide when MMPlus3D parent node is hidden
+- [x] Hide when MMPlus3D parent node is hidden
 
-[X] Update transform when MMPlus3D parent node transform update
+- [x] Update transform when MMPlus3D parent node transform update
 
-[X] Fix placement on parent with translation or rotation applied
+- [x] Fix placement on parent with translation or rotation applied
 
-[X] Probability based placement.
+- [x] Probability based placement.
 
-[] Make data block more resilient to changes.
+- [x] Align on normal option.
 
-[] Better placement (Poisson disk sampling?).
+- [x] Align on brush direction option.
 
-[X] Align on normal option.
+- [x] Random rotate around Y axis option.
 
-[X] Align on brush direction option.
+- [x] Collision mask option for instance placement
 
-[X] Random rotate around Y axis option.
+- [] Make data block more resilient to changes.
 
-[] Grid Size option.
+- [] Better placement (Poisson disk sampling?).
 
-- By default, MMgrid will partition the space into a grid with cells that are 50 in size.
+- [] Grid Size option.
 
-[] Spread in volume / spread on surface option.
+By default, MMgrid will partition the space into a grid with cells that are 50 in size.
 
-[] Custom vertex color / custom data option.
+- [] Spread in volume / spread on surface option.
 
-- Currently, the plugin expect all multimesh to use the color option (storing 16 floats per instance by default in the buffer), but we should be able to switch between, transform only, transform + vertex color, and transform + vertex color + custom data.
+- [] Custom vertex color / custom data option.
+
+Currently, the plugin expect all multimesh to use the color option (storing 16 floats per instance by default in the buffer), but we should be able to switch between, transform only, transform + vertex color, and transform + vertex color + custom data.

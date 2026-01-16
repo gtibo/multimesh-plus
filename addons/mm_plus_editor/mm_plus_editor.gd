@@ -43,6 +43,16 @@ var brush_size_box : SpinBox = null
 var randomize_color_button : Button = null
 var layers_popup_body : VBoxContainer = null
 
+var collision_layer : int = 1
+
+func _toggle_collision_layer(toggled : bool, flag_idx : int):
+	if toggled:
+		# Add collision layer
+		collision_layer |= 1 << (flag_idx)
+	else:
+		# Remove collision layer
+		collision_layer &= ~( 1 << (flag_idx) )
+
 func init_ui() -> void:
 	main_tool_bar = HBoxContainer.new()
 	color_tool_bar = HBoxContainer.new()
@@ -67,6 +77,35 @@ func init_ui() -> void:
 	layers_btn.pressed.connect(func():
 		layers_popup.popup(Rect2i(layers_btn.get_screen_position() + Vector2(0.0, layers_btn.size.y), Vector2i.ONE))
 		)
+
+	# Physics layer popup
+
+	var collision_layer_btn : Button = Button.new()
+	collision_layer_btn.theme = BTN_THEME
+	collision_layer_btn.tooltip_text = "Collision layer"
+	collision_layer_btn.icon = gui.get_theme_icon("CollisionObject3D", "EditorIcons")
+	main_tool_bar.add_child(collision_layer_btn)
+
+	var collision_layer_popup : PopupPanel = PopupPanel.new()
+	var collision_layer_popup_body : GridContainer = GridContainer.new()
+	collision_layer_popup_body.set("theme_override_constants/h_separation", 1)
+	collision_layer_popup_body.set("theme_override_constants/v_separation", 1)
+	collision_layer_popup_body.columns = 16
+	collision_layer_popup.add_child(collision_layer_popup_body)
+	main_tool_bar.add_child(collision_layer_popup)
+
+	for i in 32:
+		var layer_btn : Button = Button.new()
+		layer_btn.text = str(i + 1)
+		layer_btn.toggle_mode = true
+		if i == 0: layer_btn.set_pressed(true)
+		collision_layer_popup_body.add_child(layer_btn)
+		layer_btn.toggled.connect(_toggle_collision_layer.bind(i))
+
+	collision_layer_btn.pressed.connect(func():
+		collision_layer_popup.popup(Rect2i(collision_layer_btn.get_screen_position() + Vector2(0.0, collision_layer_btn.size.y), Vector2i.ONE))
+		)
+
 
 	# Create mode buttons
 	button_group = ButtonGroup.new()
@@ -435,6 +474,6 @@ func _get_basis_from_normal(normal : Vector3) -> Basis:
 func _ray_cast(start : Vector3, end : Vector3) -> Dictionary:
 	if selected_node == null: return {}
 	var space_state : PhysicsDirectSpaceState3D = selected_node.get_world_3d().direct_space_state
-	var query = PhysicsRayQueryParameters3D.create(start, end)
+	var query = PhysicsRayQueryParameters3D.create(start, end, collision_layer)
 	var ray_cast_result = space_state.intersect_ray(query)
 	return ray_cast_result
