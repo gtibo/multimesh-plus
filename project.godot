@@ -27,6 +27,7 @@ window/size/viewport_height=720
 
 [editor]
 
+movie_writer/video_quality=1.0
 movie_writer/movie_file="/home/tibo/Vidéos/recording.avi"
 movie_writer/mjpeg_quality=1.0
 
@@ -37,4 +38,4 @@ enabled=PackedStringArray("res://addons/mm_plus_editor/plugin.cfg")
 [rendering]
 
 lights_and_shadows/directional_shadow/soft_shadow_filter_quality=3
-anti_aliasing/quality/msaa_3d=2
+anti_aliasing/quality/msaa_3d=3

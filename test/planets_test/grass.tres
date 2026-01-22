@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MMPlusMesh" load_steps=4 format=3 uid="uid://bcv8fyhguw2i2"]
+
+[ext_resource type="Script" uid="uid://dre8v2iurryb6" path="res://addons/mm_plus_editor/resources/mm_plus_mesh.gd" id="1_mys1n"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mys1n"]
+transparency = 1
+vertex_color_use_as_albedo = true
+vertex_color_is_srgb = true
+distance_fade_mode = 2
+distance_fade_min_distance = 100.0
+distance_fade_max_distance = 90.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_ny6ip"]
+material = SubResource("StandardMaterial3D_mys1n")
+size = Vector3(0.4, 2, 0.4)
+
+[resource]
+script = ExtResource("1_mys1n")
+mesh = SubResource("BoxMesh_ny6ip")
+metadata/_custom_type_script = "uid://dre8v2iurryb6"

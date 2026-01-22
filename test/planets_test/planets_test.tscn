@@ -1,0 +1,78 @@
+[gd_scene load_steps=8 format=3 uid="uid://fpcqfsdfov4v"]
+
+[ext_resource type="Script" uid="uid://cvlhmyjyeiyob" path="res://test/planets_test/planets_test.gd" id="1_1vg4l"]
+[ext_resource type="Script" uid="uid://bbhokdtjctvyl" path="res://test/planets_test/spin.gd" id="1_6yugq"]
+[ext_resource type="PackedScene" uid="uid://clv617idsignu" path="res://test/planets_test/planet_1.tscn" id="1_b6a10"]
+[ext_resource type="PackedScene" uid="uid://lk51wo5vof5f" path="res://test/planets_test/planet_2.tscn" id="2_6yugq"]
+[ext_resource type="PackedScene" uid="uid://diqcba0qmnkyx" path="res://test/planets_test/planet_3.tscn" id="3_4cbb5"]
+[ext_resource type="Script" uid="uid://ykd2v6wrcr6d" path="res://test/planets_test/monitor_label.gd" id="5_4cbb5"]
+
+[sub_resource type="Environment" id="Environment_6yugq"]
+background_mode = 1
+background_color = Color(0.18717614, 0.18717614, 0.18717614, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.5251013, 0.5251013, 0.5251013, 1)
+tonemap_mode = 2
+
+[node name="PlanetsTest" type="Node3D"]
+script = ExtResource("1_1vg4l")
+
+[node name="Planet3" parent="." instance=ExtResource("3_4cbb5")]
+script = ExtResource("1_6yugq")
+spin_time = 25.0
+
+[node name="Marker3D" type="Marker3D" parent="."]
+script = ExtResource("1_6yugq")
+spin_time = 12.5
+
+[node name="Planet1" parent="Marker3D" instance=ExtResource("1_b6a10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 0, 0)
+
+[node name="Marker3D" type="Marker3D" parent="Marker3D/Planet1"]
+script = ExtResource("1_6yugq")
+spin_axis = Vector3(0, -1, 0)
+spin_time = 6.25
+
+[node name="Planet2" parent="Marker3D/Planet1/Marker3D" instance=ExtResource("2_6yugq")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, 0)
+
+[node name="CameraAnchor" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.57357645, 0.81915206, 0, -0.81915206, 0.57357645, 0, 0, 10)
+
+[node name="Camera3D" type="Camera3D" parent="CameraAnchor"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 80)
+current = true
+fov = 50.0
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.70710677, -0.49999997, 0.49999997, 0, 0.7071068, 0.7071068, -0.7071068, -0.5, 0.5, 0, 20, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_6yugq")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -122.0
+offset_top = 97.0
+offset_right = 122.0
+offset_bottom = 256.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "Draw Calls"
+horizontal_alignment = 1
+
+[node name="MonitorLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+horizontal_alignment = 1
+script = ExtResource("5_4cbb5")
