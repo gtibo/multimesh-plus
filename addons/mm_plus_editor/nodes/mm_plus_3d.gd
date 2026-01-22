@@ -3,9 +3,9 @@
 class_name MmPlus3D
 extends Node3D
 
+@export var grid_size : float = 50.0
+@export var previous_grid_size : float = 50.0
 @export var data : Array[MMPlusData] : set = _set_data
-
-@export_tool_button("Delete All Transforms") var delete_all_transforms_actions = delete_all_transforms
 
 signal data_changed
 
@@ -72,9 +72,6 @@ func delete_all_transforms() -> void:
 		data_group.multimesh_RID_map = {}
 
 		data_group.multimesh_data_map = {}
-
-	# Notify editor plugin to reload data.Without this, the old data persists in the editor 
-	data_changed.emit()
 
 func load_multimesh() -> void:
 	for group_idx in data.size():

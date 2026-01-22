@@ -50,13 +50,13 @@
 
 - [x] Collision mask option for instance placement
 
+- [x] Grid Size option.
+
+By default, MMgrid will partition the space into a grid with cells that are 50 in size.
+
 - [ ] Make data block more resilient to changes.
 
 - [ ] Better placement (Poisson disk sampling?).
-
-- [ ] Grid Size option.
-
-By default, MMgrid will partition the space into a grid with cells that are 50 in size.
 
 - [ ] Spread in volume / spread on surface option.
 

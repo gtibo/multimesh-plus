@@ -42,8 +42,21 @@ var preview_mesh : MeshInstance3D = null
 var brush_size_box : SpinBox = null
 var randomize_color_button : Button = null
 var layers_popup_body : VBoxContainer = null
-
 var collision_layer : int = 1
+var grid_size_spinbox : SpinBox = null
+
+func _set_grid_size(new_grid_size : float):
+	if selected_node == null: return
+	if selected_node.grid_size == new_grid_size: return
+	var previous_grid_size : float = selected_node.grid_size
+
+	var undo_redo : EditorUndoRedoManager = get_undo_redo()
+	undo_redo.create_action("Set grid size")
+	undo_redo.add_do_property(selected_node, "grid_size", new_grid_size)
+	undo_redo.add_undo_property(selected_node, "grid_size", previous_grid_size)
+	undo_redo.add_do_method(self, "_load_selected_node_data")
+	undo_redo.add_undo_method(self, "_load_selected_node_data")
+	undo_redo.commit_action()
 
 func _toggle_collision_layer(toggled : bool, flag_idx : int):
 	if toggled:
@@ -61,12 +74,49 @@ func init_ui() -> void:
 	add_control_to_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_MENU, main_tool_bar)
 	var gui = EditorInterface.get_base_control()
 
+	# Settings Popup
+	var settings_btn : Button = Button.new()
+	settings_btn.theme = BTN_THEME
+	settings_btn.text = "Settings"
+	settings_btn.icon = gui.get_theme_icon("GuiOptionArrow", "EditorIcons")
+	main_tool_bar.add_child(settings_btn)
+
+	var settings_popup : PopupPanel = PopupPanel.new()
+	var settings_popup_body = VBoxContainer.new()
+	settings_popup.add_child(settings_popup_body)
+	main_tool_bar.add_child(settings_popup)
+
+	settings_btn.pressed.connect(func():
+		settings_popup.popup(Rect2i(settings_btn.get_screen_position() + Vector2(0.0, settings_btn.size.y), Vector2i.ONE))
+		)
+
+	var grid_size_label : Label = Label.new()
+	grid_size_label.text = "Grid Size: "
+
+	grid_size_spinbox = SpinBox.new()
+	grid_size_spinbox.min_value = 5.0
+	grid_size_spinbox.max_value = 500.0
+	grid_size_spinbox.step = 1.0
+	
+	var update_grid_size_btn : Button = Button.new()
+	update_grid_size_btn.text = "Update Grid Size"
+
+	var grid_size_h_box : HBoxContainer = HBoxContainer.new()
+
+	settings_popup_body.add_child(grid_size_h_box)
+	grid_size_h_box.add_child(grid_size_label)
+	grid_size_h_box.add_child(grid_size_spinbox)
+	grid_size_h_box.add_child(update_grid_size_btn)
+	
+	update_grid_size_btn.pressed.connect(func():
+		_set_grid_size(grid_size_spinbox.value)
+		)
+
 	# Layers popup
 	var layers_btn : Button = Button.new()
 	layers_btn.theme = BTN_THEME
 	layers_btn.text = "Layers"
 	layers_btn.icon = gui.get_theme_icon("GuiOptionArrow", "EditorIcons")
-
 	main_tool_bar.add_child(layers_btn)
 
 	var layers_popup : PopupPanel = PopupPanel.new()
@@ -252,12 +302,32 @@ func _edit(object) -> void:
 
 # Reinit all the plugin on selected node data change, I'm too lazy to make something better right now
 func _load_selected_node_data() -> void:
+	grid_size_spinbox.value = selected_node.grid_size
 	data_group_list = []
-	for data_group in selected_node.data:
-		var data : Dictionary[AABB, MultiMesh] = data_group.multimesh_data_map
-		var group : MMGroup = MMGroup.new()
-		group.setup(data)
-		data_group_list.append(group)
+	# If no mismatch between grid size
+	# Feed the saved data as is
+	if selected_node.grid_size == selected_node.previous_grid_size:
+		for data_group in selected_node.data:
+			var data : Dictionary[AABB, MultiMesh] = data_group.multimesh_data_map
+			var group : MMGroup = MMGroup.new()
+			group.setup(data, selected_node.grid_size)
+			data_group_list.append(group)
+	else:
+		# If mismatch flatten all buffers into one
+		# And rebuild the groups
+		print("Grid size changed, re-parse all data")
+		for data_group in selected_node.data:
+			var flat_buffer : PackedFloat32Array = []
+			var data : Dictionary[AABB, MultiMesh] = data_group.multimesh_data_map
+			for multimesh in data.values():
+				flat_buffer.append_array(multimesh.buffer)
+			var group : MMGroup = MMGroup.new()
+			group.setup_from_buffer(flat_buffer, selected_node.grid_size)
+			data_group_list.append(group)
+	
+		selected_node.delete_all_transforms()
+		_update_selected_node_buffers()
+		selected_node.previous_grid_size = selected_node.grid_size
 
 	_rebuild_layers_ui()
 

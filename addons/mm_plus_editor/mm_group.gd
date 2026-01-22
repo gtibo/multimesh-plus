@@ -13,9 +13,9 @@ func duplicate() -> MMGroup:
 	group.mm_grid = mm_grid.duplicate()
 	return group
 
-func setup(data : Dictionary[AABB, MultiMesh]) -> void:
+func setup(data : Dictionary[AABB, MultiMesh], grid_size : float) -> void:
 	buffer_map = {}
-	mm_grid = MMGrid.new()
+	mm_grid = MMGrid.new(Vector3.ONE * grid_size)
 	for aabb in data:
 		buffer_map[aabb] = data[aabb].buffer
 		var buffer : PackedFloat32Array = data[aabb].buffer
@@ -31,6 +31,25 @@ func setup(data : Dictionary[AABB, MultiMesh]) -> void:
 			points.append(point)
 
 		mm_grid.populate(aabb, points)
+
+func setup_from_buffer(buffer : PackedFloat32Array, grid_size : float):
+	buffer_map = {}
+	mm_grid = MMGrid.new(Vector3.ONE * grid_size)
+
+	for idx in buffer.size() / 16:
+		var base_position : Vector3 = Vector3(buffer[idx * 16 + 3], buffer[idx * 16 + 7], buffer[idx * 16 + 11])
+
+		var region : AABB = mm_grid.check_region_for_point(base_position)
+		if !buffer_map.has(region): buffer_map[region] = PackedFloat32Array()
+
+		var t : Array = []
+		t.resize(16)
+		for i in t.size():
+			t[i] = buffer[idx * t.size() + i]
+		buffer_map[region].append_array(t)
+
+		var y : int = buffer_map[region].size() / 16 - 1
+		mm_grid.add_point_in_region(region, y, base_position)
 
 func remove_point_in_sphere(position : Vector3, radius : float = 1.0) -> void:
 	var result : Dictionary[AABB, PackedInt64Array] = mm_grid.remove_points_in_sphere(position, radius)

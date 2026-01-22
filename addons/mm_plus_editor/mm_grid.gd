@@ -1,8 +1,8 @@
 class_name MMGrid
 extends Object
 
-var grid_size : Vector3 = Vector3.ONE * 50.0
-var half_grid_size : Vector3 = grid_size * 0.5
+var grid_size : Vector3
+var half_grid_size : Vector3
 
 class IdPosList:
 	var count : int = 0
@@ -29,8 +29,12 @@ class IdPosList:
 
 var region_map : Dictionary[AABB, IdPosList] = {}
 
+func _init(_grid_size : Vector3) -> void:
+	grid_size = _grid_size
+	half_grid_size = grid_size / 2.0
+
 func duplicate() -> MMGrid:
-	var mm_grid_clone : MMGrid = MMGrid.new()
+	var mm_grid_clone : MMGrid = MMGrid.new(self.grid_size)
 	var new_r_m : Dictionary[AABB, IdPosList] = {}
 	for aabb in region_map:
 		new_r_m[aabb] = region_map[aabb].duplicate()

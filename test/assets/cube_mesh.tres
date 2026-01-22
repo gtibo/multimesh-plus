@@ -14,4 +14,3 @@ script = ExtResource("1_qox4d")
 name = &"Cube"
 mesh = SubResource("BoxMesh_xa4g1")
 spacing = 4.0
-rotation_mode = null
