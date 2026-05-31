@@ -16,8 +16,26 @@ var _resources_to_delete: Array[String] = []
 
 signal group_buffer_resized(group_idx: int)
 
-func _ready() -> void:
+func _enter_tree() -> void:
+	# Create rid array
+	for _i in data.size():
+		rid_references.append(MMRidRef.new())
+
+	load_multimesh()
+
 	set_notify_transform(true)
+
+	if !Engine.is_editor_hint(): return
+
+	for data_group in data:
+		if data_group.mesh_data.changed.is_connected(_on_mesh_data_changed): continue
+		data_group.mesh_data.changed.connect(_on_mesh_data_changed.bind(data_group))
+
+func _exit_tree() -> void:
+	flush()
+	for data_group in data:
+		if !data_group.mesh_data.changed.is_connected(_on_mesh_data_changed): continue
+		data_group.mesh_data.changed.disconnect(_on_mesh_data_changed.bind(data_group))
 
 func _notification(what: int) -> void:
 	match what:
@@ -41,6 +59,16 @@ func _notification(what: int) -> void:
 			for file_path in _resources_to_delete:
 				DirAccess.remove_absolute(file_path)
 			_resources_to_delete = []
+
+func _on_mesh_data_changed(data_group: MMPlusData):
+	var data_group_idx : int = data.find(data_group)
+	if data_group_idx == -1: return
+
+	var buffer_map : Dictionary[AABB, PackedFloat32Array]
+	for aabb in data_group.multimesh_data_map.keys():
+		buffer_map[aabb] = data_group.multimesh_data_map[aabb].buffer
+
+	_update_buffer(data_group_idx, buffer_map)
 
 func update_visibility_range(range: float):
 	visibility_range = range
@@ -69,23 +97,28 @@ func _update_visual_instances_transform() -> void:
 			RenderingServer.instance_set_transform(data_group.visual_instance_RID_map[aabb], global_transform)
 
 func add_mesh(plus_mesh: MMPlusMesh, at_idx: int = -1):
-	var new_data: MMPlusData = MMPlusData.new()
-	new_data.mesh_data = plus_mesh
-	new_data.used_data_mode = plus_mesh.data_mode
+	var new_data_group: MMPlusData = MMPlusData.new()
+	new_data_group.mesh_data = plus_mesh
+	new_data_group.used_data_mode = plus_mesh.data_mode
 
 	if at_idx == -1:
-		data.append(new_data)
+		data.append(new_data_group)
 		rid_references.append(MMRidRef.new())
 	else:
-		data.insert(at_idx, new_data)
+		data.insert(at_idx, new_data_group)
 		rid_references.insert(at_idx, MMRidRef.new())
 
 	_update_buffer(at_idx, {})
+
+	plus_mesh.changed.connect(_on_mesh_data_changed.bind(new_data_group))
 
 func remove_mesh(idx: int):
 	var file_path: String = data[idx].resource_path
 	if FileAccess.file_exists(file_path) && !_resources_to_delete.has(file_path):
 		_resources_to_delete.append(file_path)
+
+	var plus_mesh: MMPlusMesh = data[idx].mesh_data
+	plus_mesh.changed.disconnect(_on_mesh_data_changed.bind(plus_mesh))
 
 	_delete_group_data(idx)
 	data.remove_at(idx)
@@ -235,16 +268,6 @@ func _repare_buffer_size_mismatch(buffer : PackedFloat32Array, previous_size: in
 			resized_buffer.append_array(segment)
 
 	return resized_buffer
-
-func _enter_tree() -> void:
-	# Create rid array
-	for _i in data.size():
-		rid_references.append(MMRidRef.new())
-	
-	load_multimesh()
-
-func _exit_tree() -> void:
-	flush()
 
 func flush() -> void:
 	for data_group_idx in rid_references.size():

@@ -30,7 +30,7 @@ enum RotationMode {
 
 @export var rotation_mode : RotationMode = RotationMode.NONE
 
-@export var data_mode : MMDataMode.Mode = MMDataMode.Mode.TransformOnly
+@export var data_mode : MMDataMode.Mode = MMDataMode.Mode.TransformOnly : set = _set_data_mode
 
 func update_thumbnail() -> void:
 	if Engine.is_editor_hint():
@@ -56,4 +56,8 @@ func _set_base_scale(new_scale : float) -> void:
 
 func _set_offset(new_offset: Vector3) -> void:
 	offset = new_offset
+	emit_changed()
+
+func _set_data_mode(new_data_mode: MMDataMode.Mode) -> void:
+	data_mode = new_data_mode
 	emit_changed()
