@@ -2,22 +2,28 @@
 class_name MMPlusMesh
 extends Resource
 
-@export_tool_button("Generate Thumbnail") var update_thumbnail_action: Callable = update_thumbnail
 @export var name : StringName = "" : set = _set_name
-@export var mesh : Mesh : set = _set_mesh
 @export var thumbnail: Texture = null
+@export_tool_button("Generate Thumbnail") var update_thumbnail_action: Callable = update_thumbnail
+@export_category("Display")
+@export var mesh : Mesh : set = _set_mesh
 @export var cast_shadow : RenderingServer.ShadowCastingSetting = RenderingServer.ShadowCastingSetting.SHADOW_CASTING_SETTING_ON : set = _set_shadow_cast
+@export var data_mode : MMDataMode.Mode = MMDataMode.Mode.TransformOnly : set = _set_data_mode
+@export_category("Distribution")
 ## Minimum space between this instance and another to avoid any overlap.
 @export var spacing : float = 0.5 : set = _set_spacing
-## Offset applied to the transformation of the instance during placement.
-@export var offset : Vector3 = Vector3.ZERO : set = _set_offset
-## Base scale of the instance used during placement.
-@export_range(0.1, 10.0, 0.1, "or_greater") var base_scale : float = 1.0 : set = _set_base_scale
 ## How likely this layer is going to be picked for placement.
 ## from 0.0 (never) to 1.0 (always).
 @export_range(0.0, 1.0, 0.01) var probability : float = 1.0
-
+## Offset applied to the transformation of the instance during placement.
+@export var offset : Vector3 = Vector3.ZERO : set = _set_offset
 @export var align_on_surface_normal : bool = true
+@export var rotation_mode : RotationMode = RotationMode.NONE
+## Base scale of the instance used during placement.
+@export_range(0.1, 10.0, 0.1, "or_greater") var base_scale : float = 1.0 : set = _set_base_scale
+@export_group("Random Scale Variation")
+@export_range(0.01, 1.0, 0.01, "or_greater") var min_scale : float = 1.0 : set = _set_min_scale
+@export_range(0.01, 1.0, 0.01, "or_greater") var max_scale : float = 1.0 : set = _set_max_scale
 
 enum RotationMode {
 	## No rotation mode.
@@ -27,10 +33,6 @@ enum RotationMode {
 	## The forward axis of the instance is aligned with the direction of the brush.
 	ALIGN_BRUSH_DIR
 }
-
-@export var rotation_mode : RotationMode = RotationMode.NONE
-
-@export var data_mode : MMDataMode.Mode = MMDataMode.Mode.TransformOnly : set = _set_data_mode
 
 func update_thumbnail() -> void:
 	if Engine.is_editor_hint():
@@ -53,6 +55,14 @@ func _set_spacing(new_spacing : float) -> void:
 
 func _set_base_scale(new_scale : float) -> void:
 	base_scale = new_scale
+
+func _set_min_scale(new_min_scale) -> void:
+	min_scale = new_min_scale
+	if min_scale > max_scale: _set_max_scale(min_scale)
+
+func _set_max_scale(new_max_scale) -> void:
+	max_scale = new_max_scale
+	if max_scale < min_scale: _set_min_scale(max_scale)
 
 func _set_offset(new_offset: Vector3) -> void:
 	offset = new_offset

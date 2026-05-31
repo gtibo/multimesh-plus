@@ -26,7 +26,6 @@ image = SubResource("Image_ys3c2")
 [resource]
 script = ExtResource("1_4vbhn")
 name = &"Cylinder"
-mesh = SubResource("CylinderMesh_xa4g1")
 thumbnail = SubResource("ImageTexture_kl1ei")
+mesh = SubResource("CylinderMesh_xa4g1")
 offset = Vector3(0, 0.25, 0)
-data_mode = 1

@@ -562,9 +562,8 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 			# Capture base position BEFORE applying any transforms
 			# This is the logical placement position used for spatial queries
 			var base_position : Vector3 = target.origin
-			var item_base_scale : float = mesh_data.base_scale
-			if item_base_scale != 1.0:
-				target = target.scaled_local(Vector3.ONE * item_base_scale)
+			var item_scale : float = mesh_data.base_scale * randf_range(mesh_data.min_scale, mesh_data.max_scale)
+			target = target.scaled_local(Vector3.ONE * item_scale)
 			# Apply visual offset to the transform (for rendering)
 			if mesh_data.offset != Vector3.ZERO:
 				target = target.translated_local(mesh_data.offset)

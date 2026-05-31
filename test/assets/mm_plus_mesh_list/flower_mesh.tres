@@ -51,8 +51,11 @@ image = SubResource("Image_ggmt5")
 [resource]
 script = ExtResource("2_ixv8x")
 name = &"Flower"
-mesh = SubResource("ArrayMesh_h73uu")
 thumbnail = SubResource("ImageTexture_rdjhr")
-rotation_mode = 1
+mesh = SubResource("ArrayMesh_h73uu")
 data_mode = 1
+spacing = 2.0
+rotation_mode = 1
+min_scale = 0.5
+max_scale = 1.2
 metadata/_custom_type_script = "uid://dre8v2iurryb6"
