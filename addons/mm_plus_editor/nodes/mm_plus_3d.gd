@@ -71,6 +71,7 @@ func _update_visual_instances_transform() -> void:
 func add_mesh(plus_mesh: MMPlusMesh, at_idx: int = -1):
 	var new_data: MMPlusData = MMPlusData.new()
 	new_data.mesh_data = plus_mesh
+	new_data.used_data_mode = plus_mesh.data_mode
 
 	if at_idx == -1:
 		data.append(new_data)
@@ -78,7 +79,8 @@ func add_mesh(plus_mesh: MMPlusMesh, at_idx: int = -1):
 	else:
 		data.insert(at_idx, new_data)
 		rid_references.insert(at_idx, MMRidRef.new())
-	_update_buffer(data.size(), {})
+
+	_update_buffer(at_idx, {})
 
 func remove_mesh(idx: int):
 	var file_path: String = data[idx].resource_path
@@ -165,12 +167,18 @@ func check_missmatch(data_group_list : Array[MMGroup]):
 				_remove_buffer(data_group_idx, aabb)
 
 func _update_buffer(data_group_idx : int, buffer_map : Dictionary[AABB, PackedFloat32Array]) -> void:
+	if data_group_idx == -1: return
+
+	var data_mode: MMDataMode.Mode = data[data_group_idx].mesh_data.data_mode
+	var data_size: int = MMDataMode.get_data_mode_size(data_mode)
+	var previous_data_size: int = MMDataMode.get_data_mode_size(data[data_group_idx].used_data_mode)
+	var use_color: bool = data_mode == MMDataMode.Mode.TransformAndVertexColor
+	var data_mode_mismatch = data[data_group_idx].used_data_mode != data_mode
+
+	if data_mode_mismatch:
+		push_warning("Buffer size doesn't match mesh data mode size, buffer size will be updated but some data might be lost.")
+
 	for aabb in buffer_map:
-
-		var data_mode: MMDataMode.Mode = data[data_group_idx].mesh_data.data_mode
-		var data_size: int = MMDataMode.get_data_mode_size(data_mode)
-		var use_color: bool = data_mode == MMDataMode.Mode.TransformAndVertexColor
-
 		if !rid_references[data_group_idx].multimesh_RID_map.has(aabb):
 			_add_visual_instance(data_group_idx, aabb)
 		if !data[data_group_idx].multimesh_data_map.has(aabb):
@@ -178,46 +186,52 @@ func _update_buffer(data_group_idx : int, buffer_map : Dictionary[AABB, PackedFl
 
 		var m_rid : RID = rid_references[data_group_idx].multimesh_RID_map[aabb]
 		var multimesh : MultiMesh = data[data_group_idx].multimesh_data_map[aabb]
-
-
 		var buffer : PackedFloat32Array = []
 
-		if buffer_map[aabb].size() % data_size == 0:
+		if !data_mode_mismatch:
 			buffer = buffer_map[aabb]
 		else:
-			push_warning("Buffer size doesn't match mesh data mode size, buffer size will be updated but some data might be lost.")
-			buffer = _repare_buffer_size_mismatch(buffer_map[aabb], data_size)
+			buffer = _repare_buffer_size_mismatch(buffer_map[aabb], previous_data_size, data_size)
 			multimesh.instance_count = 0
 			multimesh.use_colors = use_color
 
-		RenderingServer.multimesh_allocate_data(m_rid, buffer.size() / data_size, RenderingServer.MULTIMESH_TRANSFORM_3D, use_color, false)
 
 		if !buffer.is_empty():
+			RenderingServer.multimesh_allocate_data(
+				m_rid,
+				buffer.size() / data_size,
+				RenderingServer.MULTIMESH_TRANSFORM_3D,
+				use_color, false)
+
 			RenderingServer.multimesh_set_buffer(m_rid, buffer)
 			multimesh.instance_count = buffer.size() / data_size
 			multimesh.buffer = buffer
 		else:
 			_remove_buffer(data_group_idx, aabb)
 
-func _repare_buffer_size_mismatch(buffer : PackedFloat32Array, new_size: int) -> PackedFloat32Array:
-	var resized_buffer: PackedFloat32Array = []
-	var previous_size: int = MMDataMode.get_data_mode_from_buffer_size(buffer.size())
+	data[data_group_idx].used_data_mode = data_mode
 
+func _repare_buffer_size_mismatch(buffer : PackedFloat32Array, previous_size: int, new_size: int) -> PackedFloat32Array:
+	var resized_buffer: PackedFloat32Array = []
+	
+	# from TransformAndVertexColor to TransformOnly
 	if new_size < previous_size:
 		for idx in range(0, buffer.size(), previous_size):
 			for i in new_size:
 				resized_buffer.append(buffer[idx + i])
 
+	# from TransformOnly to TransformAndVertexColor
 	if new_size > previous_size:
-		for idx in range(0, buffer.size(), new_size):
+		for idx in range(0, buffer.size(), previous_size):
+			var segment: PackedFloat32Array = []
 			for i in previous_size:
-				resized_buffer.append(buffer[idx + i])
+				segment.append(buffer[idx + i])
 
-			if new_size > previous_size:
-				var missing_data: PackedFloat32Array = []
-				missing_data.resize(new_size - previous_size)
-				missing_data.fill(0.0)
-				resized_buffer.append_array(missing_data)
+			var missing_data: PackedFloat32Array = []
+			missing_data.resize(new_size - previous_size)
+			missing_data.fill(0.0)
+			segment.append_array(missing_data)
+			resized_buffer.append_array(segment)
 
 	return resized_buffer
 
