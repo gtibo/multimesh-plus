@@ -14,7 +14,7 @@ var rid_references: Array[MMRidRef]
 # Keep track of what resource to delete on save
 var _resources_to_delete: Array[String] = []
 
-signal data_changed
+signal group_buffer_resized(group_idx: int)
 
 func _ready() -> void:
 	set_notify_transform(true)
@@ -175,9 +175,6 @@ func _update_buffer(data_group_idx : int, buffer_map : Dictionary[AABB, PackedFl
 	var use_color: bool = data_mode == MMDataMode.Mode.TransformAndVertexColor
 	var data_mode_mismatch = data[data_group_idx].used_data_mode != data_mode
 
-	if data_mode_mismatch:
-		push_warning("Buffer size doesn't match mesh data mode size, buffer size will be updated but some data might be lost.")
-
 	for aabb in buffer_map:
 		if !rid_references[data_group_idx].multimesh_RID_map.has(aabb):
 			_add_visual_instance(data_group_idx, aabb)
@@ -208,6 +205,10 @@ func _update_buffer(data_group_idx : int, buffer_map : Dictionary[AABB, PackedFl
 			multimesh.buffer = buffer
 		else:
 			_remove_buffer(data_group_idx, aabb)
+
+	if data_mode_mismatch:
+		push_warning("Buffer size doesn't match mesh data mode size, buffer size was updated but some data might be lost.")
+		group_buffer_resized.emit(data_group_idx)
 
 	data[data_group_idx].used_data_mode = data_mode
 

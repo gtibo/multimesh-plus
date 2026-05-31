@@ -380,17 +380,25 @@ func _edit(object) -> void:
 	var previous_selected_node : MmPlus3D = selected_node
 	selected_node = object
 
-	if selected_node && !selected_node.data_changed.is_connected(_load_selected_node_data):
+	if selected_node:
 		_load_selected_node_data()
-		selected_node.data_changed.connect(_load_selected_node_data)
-	
-	if previous_selected_node && previous_selected_node.data_changed.is_connected(_load_selected_node_data):
-		previous_selected_node.data_changed.disconnect(_load_selected_node_data)
-	
+
+		if !selected_node.group_buffer_resized.is_connected(_on_buffer_resize):
+			selected_node.group_buffer_resized.connect(_on_buffer_resize)
+
+	if previous_selected_node && previous_selected_node.group_buffer_resized.is_connected(_on_buffer_resize):
+		previous_selected_node.group_buffer_resized.disconnect(_on_buffer_resize)
+
 	main_tool_bar.visible = selected_node != null
 
 	if selected_node == null:
 		preview_mesh.hide()
+
+func _on_buffer_resize(group_idx: int) -> void:
+	var data_group : MMPlusData = selected_node.data[group_idx]
+	var multimesh_data : Dictionary[AABB, MultiMesh] = selected_node.data[group_idx].multimesh_data_map
+	data_group_list[group_idx].setup(multimesh_data, selected_node.grid_size, data_group.mesh_data.data_mode)
+
 
 # Reinit all the plugin on selected node data change, I'm too lazy to make something better right now
 func _load_selected_node_data() -> void:

@@ -36,8 +36,7 @@ shape = SubResource("ConcavePolygonShape3D_ctnn2")
 [node name="MmPlus3D" type="Node3D" parent="Ground" unique_id=1238071199]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4, 0)
 script = ExtResource("1_xa4g1")
-grid_size = 25.0
-previous_grid_size = 25.0
+visibility_range = 200.0
 metadata/_custom_type_script = "uid://be4lu3ug8donp"
 metadata/_edit_lock_ = true
 
