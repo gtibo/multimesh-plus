@@ -363,6 +363,7 @@ func _on_button_group_press(_pressed_button : BaseButton):
 
 func _enter_tree() -> void:
 	_init_ui()
+	_check_unused_resources()
 
 func _save_external_data() -> void:
 	_check_unused_resources()
