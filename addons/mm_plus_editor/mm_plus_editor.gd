@@ -249,13 +249,16 @@ func _init_ui() -> void:
 	preview_mesh.hide()
 
 func _on_request_add_item(plus_mesh: MMPlusMesh) -> void:
+	if selected_node.data_group == null: 
+		push_warning("Cannot add a new MMPlusMesh to the MMplus3D node when its DataGroup is null")
+		return
 	# Check if Mesh resource is not already used by the MMPlus3D node
-	var find_int: int = selected_node.data.find_custom(func(data: MMPlusData):
+	var find_int: int = selected_node.data_group.groups.find_custom(func(data: MMPlusData):
 		return data.mesh_data == plus_mesh
 		)
 	if find_int != -1: return
 
-	var undo_idx: int = selected_node.data.size()
+	var undo_idx: int = selected_node.data_group.groups.size()
 	var undo_prop: Array[MMGroup] = _get_data_group_clone()
 
 	var undo_redo : EditorUndoRedoManager = get_undo_redo()
@@ -270,7 +273,7 @@ func _on_request_add_item(plus_mesh: MMPlusMesh) -> void:
 	undo_redo.commit_action()
 
 func _on_request_delete_item(idx: int) -> void:
-	var undo_plus_mesh: MMPlusMesh = selected_node.data[idx].mesh_data
+	var undo_plus_mesh: MMPlusMesh = selected_node.data_group.groups[idx].mesh_data
 	var undo_idx: int = idx
 	var undo_prop: Array[MMGroup] = _get_data_group_clone()
 
@@ -363,10 +366,6 @@ func _on_button_group_press(_pressed_button : BaseButton):
 
 func _enter_tree() -> void:
 	_init_ui()
-	_check_unused_resources()
-
-func _save_external_data() -> void:
-	_check_unused_resources()
 
 func _exit_tree() -> void:
 	if main_tool_bar == null: return
@@ -396,8 +395,8 @@ func _edit(object) -> void:
 		preview_mesh.hide()
 
 func _on_buffer_resize(group_idx: int) -> void:
-	var data_group : MMPlusData = selected_node.data[group_idx]
-	var multimesh_data : Dictionary[AABB, MultiMesh] = selected_node.data[group_idx].multimesh_data_map
+	var data_group : MMPlusData = selected_node.data_group.groups[group_idx]
+	var multimesh_data : Dictionary[AABB, MultiMesh] = selected_node.data_group.groups[group_idx].multimesh_data_map
 	data_group_list[group_idx].setup(multimesh_data, selected_node.grid_size, data_group.mesh_data.data_mode)
 
 
@@ -406,10 +405,14 @@ func _load_selected_node_data() -> void:
 	grid_size_spinbox.value = selected_node.grid_size
 	visibility_range_spinbox.value = selected_node.visibility_range
 	data_group_list = []
+
+	if !selected_node.data_group:
+		items_list.free_items()
+		return
 	# If no mismatch between grid size
 	# Feed the saved data as is
 	if selected_node.grid_size == selected_node.previous_grid_size:
-		for data_group in selected_node.data:
+		for data_group in selected_node.data_group.groups:
 			var data : Dictionary[AABB, MultiMesh] = data_group.multimesh_data_map
 			var group : MMGroup = MMGroup.new()
 			group.setup(data, selected_node.grid_size, data_group.mesh_data.data_mode)
@@ -418,7 +421,7 @@ func _load_selected_node_data() -> void:
 		# If mismatch flatten all buffers into one
 		# And rebuild the groups
 		print("Grid size changed, re-parse all data")
-		for data_group in selected_node.data:
+		for data_group in selected_node.data_group.groups:
 			var flat_buffer : PackedFloat32Array = []
 			var data : Dictionary[AABB, MultiMesh] = data_group.multimesh_data_map
 			for multimesh in data.values():
@@ -434,13 +437,13 @@ func _load_selected_node_data() -> void:
 	_rebuild_layers_ui()
 
 func _rebuild_layers_ui() -> void:
-	var item_count: int = selected_node.data.size()
+	var item_count: int = selected_node.data_group.groups.size()
 	active_layers = []
 	active_layers.resize(item_count)
 	active_layers.fill(true)
 
 	var mesh_list: Array[MMPlusMesh] = []
-	mesh_list.assign(selected_node.data.map(func(mmplus_data: MMPlusData): return mmplus_data.mesh_data))
+	mesh_list.assign(selected_node.data_group.groups.map(func(mmplus_data: MMPlusData): return mmplus_data.mesh_data))
 
 	var items: Array[MMPlusMeshItem] = items_list.load_from_list(mesh_list)
 	# Connect active layers to item toggles
@@ -476,7 +479,8 @@ func _forward_3d_gui_input(viewport_camera, event):
 
 func _check_editing_modes(viewport_camera, event) -> void:
 	# Editing modes cannot be used if there are no mesh groups to edit.
-	if selected_node.data.is_empty(): return
+	if selected_node.data_group == null: return
+	if selected_node.data_group.groups.is_empty(): return
 
 	var mouse_event : InputEventMouse = event as InputEventMouse
 	if !mouse_event: return
@@ -526,10 +530,10 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 	else:
 		# Paint
 		for i in range(16):
-			var weights : Array = selected_node.data.map(func(group: MMPlusData): return group.mesh_data.probability)
+			var weights : Array = selected_node.data_group.groups.map(func(group: MMPlusData): return group.mesh_data.probability)
 			var data_group_idx : int = rnd.rand_weighted(weights)
 			if active_layers[data_group_idx] == false: continue
-			var mesh_data : MMPlusMesh = selected_node.data[data_group_idx].mesh_data
+			var mesh_data : MMPlusMesh = selected_node.data_group.groups[data_group_idx].mesh_data
 
 			var circle_offset : Vector2 = _random_in_circle(brush_size)
 			var target = t.translated_local(Vector3(circle_offset.x, 0.0, circle_offset.y))
@@ -613,7 +617,7 @@ func _apply_color_mode(t : Transform3D) -> void:
 	for data_group_idx in data_group_list.size():
 		if active_layers[data_group_idx] == false: continue
 
-		var data_mode : MMDataMode.Mode = selected_node.data[data_group_idx].mesh_data.data_mode
+		var data_mode : MMDataMode.Mode = selected_node.data_group.groups[data_group_idx].mesh_data.data_mode
 		if data_mode == MMDataMode.Mode.TransformOnly: continue
 
 		var data_group : MMGroup = data_group_list[data_group_idx]
@@ -658,23 +662,3 @@ func _ray_cast(start : Vector3, end : Vector3) -> Dictionary:
 	var query = PhysicsRayQueryParameters3D.create(start, end, collision_layer)
 	var ray_cast_result = space_state.intersect_ray(query)
 	return ray_cast_result
-
-func _check_unused_resources() -> void:
-	# Create a save directory if one does not already exist.
-	var save_path: String = "res://mmplus_save_dir/"
-	if !DirAccess.dir_exists_absolute(save_path):
-		DirAccess.make_dir_absolute(save_path)
-
-	# TODO: Improve deletion method
-	# Delete all MMPlusData resources that do not have a parent scene.
-
-	var files = DirAccess.get_files_at(save_path)
-
-	for file in files:
-		var file_path: String = save_path.path_join(file)
-		var data: MMPlusData = load(file_path) as MMPlusData
-		if data == null: continue
-		if data.owner_uid == -1: continue
-		if !ResourceUID.has_id(data.owner_uid):
-			DirAccess.remove_absolute(file_path)
-			print("Deleting an MMPlusData resource missing a parent scene: ", file_path)

@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://be4lu3ug8donp" path="res://addons/mm_plus_editor/nodes/mm_plus_3d.gd" id="1_xa4g1"]
 [ext_resource type="Material" uid="uid://c1kohdpddpx58" path="res://test/assets/materials/grid_mat.tres" id="4_1flo6"]
+[ext_resource type="Resource" uid="uid://kqkxf7ie6iuh" path="res://test/general_test/general_test_mm_data.res" id="4_j304v"]
 [ext_resource type="ArrayMesh" uid="uid://e30wijdwlaje" path="res://test/assets/ground_mesh.obj" id="9_ctnn2"]
 
 [sub_resource type="Environment" id="Environment_u2sx3"]
@@ -24,6 +25,14 @@ environment = SubResource("Environment_u2sx3")
 transform = Transform3D(0.70710677, -0.6123724, 0.35355332, 0, 0.49999994, 0.8660254, -0.70710677, -0.6123724, 0.35355332, 0, 0, 0)
 shadow_enabled = true
 
+[node name="MmPlus3D" type="Node3D" parent="." unique_id=1238071199]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4, 0)
+script = ExtResource("1_xa4g1")
+data_group = ExtResource("4_j304v")
+visibility_range = 200.0
+metadata/_custom_type_script = "uid://be4lu3ug8donp"
+metadata/_edit_lock_ = true
+
 [node name="Ground" type="StaticBody3D" parent="." unique_id=1111453339]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=192741462]
@@ -32,13 +41,6 @@ mesh = ExtResource("9_ctnn2")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=1968106299]
 shape = SubResource("ConcavePolygonShape3D_ctnn2")
-
-[node name="MmPlus3D" type="Node3D" parent="Ground" unique_id=1238071199]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4, 0)
-script = ExtResource("1_xa4g1")
-visibility_range = 200.0
-metadata/_custom_type_script = "uid://be4lu3ug8donp"
-metadata/_edit_lock_ = true
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=1096268888]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 18.151703, 56)

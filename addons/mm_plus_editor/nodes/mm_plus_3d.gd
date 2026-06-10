@@ -3,39 +3,39 @@
 class_name MmPlus3D
 extends Node3D
 
+@export var data_group : MMPlusDataGroup
 @export_storage var grid_size : float = 50.0
 @export_storage var previous_grid_size : float = 50.0
 @export_storage var visibility_range: float = 100.0
-@export_storage var data : Array[MMPlusData]
 
 var save_path: String = "res://mmplus_save_dir/"
 var rid_references: Array[MMRidRef]
 
-# Keep track of what resource to delete on save
-var _resources_to_delete: Array[String] = []
-
 signal group_buffer_resized(group_idx: int)
 
 func _enter_tree() -> void:
+	set_notify_transform(true)
+
+	if data_group == null: return
+
 	# Create rid array
-	for _i in data.size():
+	for _i in data_group.groups.size():
 		rid_references.append(MMRidRef.new())
 
 	load_multimesh()
 
-	set_notify_transform(true)
-
 	if !Engine.is_editor_hint(): return
 
-	for data_group in data:
-		if data_group.mesh_data.changed.is_connected(_on_mesh_data_changed): continue
-		data_group.mesh_data.changed.connect(_on_mesh_data_changed.bind(data_group))
+	for group in data_group.groups:
+		if group.mesh_data.changed.is_connected(_on_mesh_data_changed): continue
+		group.mesh_data.changed.connect(_on_mesh_data_changed.bind(group))
 
 func _exit_tree() -> void:
-	flush()
-	for data_group in data:
-		if !data_group.mesh_data.changed.is_connected(_on_mesh_data_changed): continue
-		data_group.mesh_data.changed.disconnect(_on_mesh_data_changed.bind(data_group))
+	_free_rid_references()
+	if data_group == null: return
+	for group in data_group.groups:
+		if !group.mesh_data.changed.is_connected(_on_mesh_data_changed): continue
+		group.mesh_data.changed.disconnect(_on_mesh_data_changed.bind(group))
 
 func _notification(what: int) -> void:
 	match what:
@@ -43,38 +43,22 @@ func _notification(what: int) -> void:
 			_update_visual_instances_visibility()
 		NOTIFICATION_TRANSFORM_CHANGED:
 			_update_visual_instances_transform()
-		NOTIFICATION_EDITOR_PRE_SAVE:
-			var save_flags: int = ResourceSaver.FLAG_CHANGE_PATH + ResourceSaver.FLAG_COMPRESS
-			for data_group in data:
-				data_group.owner_uid = ResourceLoader.get_resource_uid(owner.scene_file_path)
-				var is_resource_on_disk: bool = FileAccess.file_exists(data_group.resource_path)
-				if is_resource_on_disk:
-					ResourceSaver.save(data_group, data_group.resource_path, save_flags)
-				else:
-					var file_name: String = data_group.generate_scene_unique_id() + ".res"
-					var path: String = save_path.path_join(file_name)
-					data_group.resource_path = path
-					ResourceSaver.save(data_group, path, save_flags)
 
-			for file_path in _resources_to_delete:
-				DirAccess.remove_absolute(file_path)
-			_resources_to_delete = []
-
-func _on_mesh_data_changed(data_group: MMPlusData):
-	var data_group_idx : int = data.find(data_group)
-	if data_group_idx == -1: return
+func _on_mesh_data_changed(group: MMPlusData):
+	var group_idx : int = data_group.groups.find(group)
+	if group_idx == -1: return
 
 	var buffer_map : Dictionary[AABB, PackedFloat32Array]
-	for aabb in data_group.multimesh_data_map.keys():
-		buffer_map[aabb] = data_group.multimesh_data_map[aabb].buffer
+	for aabb in group.multimesh_data_map.keys():
+		buffer_map[aabb] = group.multimesh_data_map[aabb].buffer
 
-	_update_buffer(data_group_idx, buffer_map)
+	_update_buffer(group_idx, buffer_map)
 
 func update_visibility_range(range: float):
 	visibility_range = range
 
-	for data_group_idx in rid_references.size():
-		var data_group : MMRidRef = rid_references[data_group_idx]
+	for group_idx in rid_references.size():
+		var data_group : MMRidRef = rid_references[group_idx]
 		for aabb in data_group.visual_instance_RID_map:
 			RenderingServer.instance_geometry_set_visibility_range(
 				data_group.visual_instance_RID_map[aabb],
@@ -85,14 +69,14 @@ func update_visibility_range(range: float):
 				RenderingServer.VISIBILITY_RANGE_FADE_DISABLED)
 
 func _update_visual_instances_visibility() -> void:
-	for data_group_idx in rid_references.size():
-		var data_group : MMRidRef = rid_references[data_group_idx]
+	for group_idx in rid_references.size():
+		var data_group : MMRidRef = rid_references[group_idx]
 		for aabb in data_group.visual_instance_RID_map:
 			RenderingServer.instance_set_visible(data_group.visual_instance_RID_map[aabb], visible)
 
 func _update_visual_instances_transform() -> void:
-	for data_group_idx in rid_references.size():
-		var data_group : MMRidRef = rid_references[data_group_idx]
+	for group_idx in rid_references.size():
+		var data_group : MMRidRef = rid_references[group_idx]
 		for aabb in data_group.visual_instance_RID_map:
 			RenderingServer.instance_set_transform(data_group.visual_instance_RID_map[aabb], global_transform)
 
@@ -102,27 +86,23 @@ func add_mesh(plus_mesh: MMPlusMesh, at_idx: int = -1):
 	new_data_group.used_data_mode = plus_mesh.data_mode
 
 	if at_idx == -1:
-		data.append(new_data_group)
+		data_group.groups.append(new_data_group)
 		rid_references.append(MMRidRef.new())
 	else:
-		data.insert(at_idx, new_data_group)
+		data_group.groups.insert(at_idx, new_data_group)
 		rid_references.insert(at_idx, MMRidRef.new())
 
 	_update_buffer(at_idx, {})
 
 	plus_mesh.changed.connect(_on_mesh_data_changed.bind(new_data_group))
 
-func remove_mesh(idx: int):
-	var file_path: String = data[idx].resource_path
-	if FileAccess.file_exists(file_path) && !_resources_to_delete.has(file_path):
-		_resources_to_delete.append(file_path)
-
-	var plus_mesh: MMPlusMesh = data[idx].mesh_data
+func remove_mesh(group_idx: int):
+	var plus_mesh: MMPlusMesh = data_group.groups[group_idx].mesh_data
 	plus_mesh.changed.disconnect(_on_mesh_data_changed.bind(plus_mesh))
 
-	_delete_group_data(idx)
-	data.remove_at(idx)
-	rid_references.remove_at(idx)
+	_delete_group_data(group_idx)
+	data_group.groups.remove_at(group_idx)
+	rid_references.remove_at(group_idx)
 
 func _delete_group_data(group_idx: int) -> void:
 	var group_rid_ref : MMRidRef = rid_references[group_idx]
@@ -135,29 +115,29 @@ func _delete_group_data(group_idx: int) -> void:
 		RenderingServer.free_rid(group_rid_ref.multimesh_RID_map[aabb])
 	group_rid_ref.multimesh_RID_map = {}
 
-	data[group_idx].multimesh_data_map = {}
+	data_group.groups[group_idx].multimesh_data_map = {}
 
 func delete_all_transforms() -> void:
-	for group_idx in data.size():
+	for group_idx in data_group.groups.size():
 		_delete_group_data(group_idx)
 
 func load_multimesh() -> void:
-	for group_idx in data.size():
+	for group_idx in data_group.groups.size():
 
 		var buffer_map : Dictionary[AABB, PackedFloat32Array]
 
-		for aabb in data[group_idx].multimesh_data_map.keys():
-			var multimesh : MultiMesh = data[group_idx].multimesh_data_map[aabb]
+		for aabb in data_group.groups[group_idx].multimesh_data_map.keys():
+			var multimesh : MultiMesh = data_group.groups[group_idx].multimesh_data_map[aabb]
 			if multimesh.instance_count == 0:
 				# This instance can be skipped and deleted before being loaded
-				data[group_idx].multimesh_data_map.erase(aabb)
+				data_group.groups[group_idx].multimesh_data_map.erase(aabb)
 				continue
-			buffer_map[aabb] = data[group_idx].multimesh_data_map[aabb].buffer
+			buffer_map[aabb] = data_group.groups[group_idx].multimesh_data_map[aabb].buffer
 
 		_update_buffer(group_idx, buffer_map)
 
 func _add_visual_instance(group_idx : int, aabb : AABB) -> void:
-	var mesh_data : MMPlusMesh = data[group_idx].mesh_data
+	var mesh_data : MMPlusMesh = data_group.groups[group_idx].mesh_data
 	var mesh : Mesh = mesh_data.mesh
 	var m_rid = RenderingServer.multimesh_create()
 	var i_rid : RID = RenderingServer.instance_create2(m_rid, get_world_3d().scenario)
@@ -173,49 +153,49 @@ func _add_multimesh_data(group_idx : int, aabb : AABB, use_color: bool) -> void:
 	var multimesh : MultiMesh = MultiMesh.new()
 	multimesh.use_colors = use_color
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
-	data[group_idx].multimesh_data_map[aabb] = multimesh
+	data_group.groups[group_idx].multimesh_data_map[aabb] = multimesh
 
 func update_group_buffer(data_group_list : Array[MMGroup]):
-	for data_group_idx in data_group_list.size():
-		var data_group : MMGroup = data_group_list[data_group_idx]
+	for group_idx in data_group_list.size():
+		var data_group : MMGroup = data_group_list[group_idx]
 		var buffer_map : Dictionary[AABB, PackedFloat32Array] = data_group.buffer_map
-		_update_buffer(data_group_idx, buffer_map)
+		_update_buffer(group_idx, buffer_map)
 
-func _remove_buffer(data_group_idx : int, aabb : AABB):
-	var m_rid : RID = rid_references[data_group_idx].multimesh_RID_map[aabb]
-	var i_rid : RID = rid_references[data_group_idx].visual_instance_RID_map[aabb]
+func _remove_buffer(group_idx : int, aabb : AABB):
+	var m_rid : RID = rid_references[group_idx].multimesh_RID_map[aabb]
+	var i_rid : RID = rid_references[group_idx].visual_instance_RID_map[aabb]
 	RenderingServer.free_rid(i_rid)
 	RenderingServer.free_rid(m_rid)
-	rid_references[data_group_idx].visual_instance_RID_map.erase(aabb)
-	rid_references[data_group_idx].multimesh_RID_map.erase(aabb)
-	data[data_group_idx].multimesh_data_map.erase(aabb)
+	rid_references[group_idx].visual_instance_RID_map.erase(aabb)
+	rid_references[group_idx].multimesh_RID_map.erase(aabb)
+	data_group.groups[group_idx].multimesh_data_map.erase(aabb)
 
 func check_missmatch(data_group_list : Array[MMGroup]):
-	for data_group_idx in data.size():
-		var local_data : Dictionary[AABB, MultiMesh] = data[data_group_idx].multimesh_data_map
-		var external_data : Dictionary[AABB, PackedFloat32Array] = data_group_list[data_group_idx].buffer_map
-		
+	for group_idx in data_group.groups.size():
+		var local_data : Dictionary[AABB, MultiMesh] = data_group.groups[group_idx].multimesh_data_map
+		var external_data : Dictionary[AABB, PackedFloat32Array] = data_group_list[group_idx].buffer_map
+
 		for aabb in local_data:
 			if !external_data.has(aabb):
-				_remove_buffer(data_group_idx, aabb)
+				_remove_buffer(group_idx, aabb)
 
-func _update_buffer(data_group_idx : int, buffer_map : Dictionary[AABB, PackedFloat32Array]) -> void:
-	if data_group_idx == -1: return
+func _update_buffer(group_idx : int, buffer_map : Dictionary[AABB, PackedFloat32Array]) -> void:
+	if group_idx == -1: return
 
-	var data_mode: MMDataMode.Mode = data[data_group_idx].mesh_data.data_mode
+	var data_mode: MMDataMode.Mode = data_group.groups[group_idx].mesh_data.data_mode
 	var data_size: int = MMDataMode.get_data_mode_size(data_mode)
-	var previous_data_size: int = MMDataMode.get_data_mode_size(data[data_group_idx].used_data_mode)
+	var previous_data_size: int = MMDataMode.get_data_mode_size(data_group.groups[group_idx].used_data_mode)
 	var use_color: bool = data_mode == MMDataMode.Mode.TransformAndVertexColor
-	var data_mode_mismatch = data[data_group_idx].used_data_mode != data_mode
+	var data_mode_mismatch = data_group.groups[group_idx].used_data_mode != data_mode
 
 	for aabb in buffer_map:
-		if !rid_references[data_group_idx].multimesh_RID_map.has(aabb):
-			_add_visual_instance(data_group_idx, aabb)
-		if !data[data_group_idx].multimesh_data_map.has(aabb):
-			_add_multimesh_data(data_group_idx, aabb, use_color)
+		if !rid_references[group_idx].multimesh_RID_map.has(aabb):
+			_add_visual_instance(group_idx, aabb)
+		if !data_group.groups[group_idx].multimesh_data_map.has(aabb):
+			_add_multimesh_data(group_idx, aabb, use_color)
 
-		var m_rid : RID = rid_references[data_group_idx].multimesh_RID_map[aabb]
-		var multimesh : MultiMesh = data[data_group_idx].multimesh_data_map[aabb]
+		var m_rid : RID = rid_references[group_idx].multimesh_RID_map[aabb]
+		var multimesh : MultiMesh = data_group.groups[group_idx].multimesh_data_map[aabb]
 		var buffer : PackedFloat32Array = []
 
 		if !data_mode_mismatch:
@@ -237,13 +217,13 @@ func _update_buffer(data_group_idx : int, buffer_map : Dictionary[AABB, PackedFl
 			multimesh.instance_count = buffer.size() / data_size
 			multimesh.buffer = buffer
 		else:
-			_remove_buffer(data_group_idx, aabb)
+			_remove_buffer(group_idx, aabb)
 
 	if data_mode_mismatch:
 		push_warning("Buffer size doesn't match mesh data mode size, buffer size was updated but some data might be lost.")
-		group_buffer_resized.emit(data_group_idx)
+		group_buffer_resized.emit(group_idx)
 
-	data[data_group_idx].used_data_mode = data_mode
+	data_group.groups[group_idx].used_data_mode = data_mode
 
 func _repare_buffer_size_mismatch(buffer : PackedFloat32Array, previous_size: int, new_size: int) -> PackedFloat32Array:
 	var resized_buffer: PackedFloat32Array = []
@@ -269,12 +249,12 @@ func _repare_buffer_size_mismatch(buffer : PackedFloat32Array, previous_size: in
 
 	return resized_buffer
 
-func flush() -> void:
-	for data_group_idx in rid_references.size():
-		for aabb in rid_references[data_group_idx].visual_instance_RID_map:
-			RenderingServer.free_rid(rid_references[data_group_idx].visual_instance_RID_map[aabb])
-		rid_references[data_group_idx].visual_instance_RID_map = {}
+func _free_rid_references() -> void:
+	for group_idx in rid_references.size():
+		for aabb in rid_references[group_idx].visual_instance_RID_map:
+			RenderingServer.free_rid(rid_references[group_idx].visual_instance_RID_map[aabb])
+		rid_references[group_idx].visual_instance_RID_map = {}
 
-		for aabb in rid_references[data_group_idx].multimesh_RID_map:
-			RenderingServer.free_rid(rid_references[data_group_idx].multimesh_RID_map[aabb])
-		rid_references[data_group_idx].multimesh_RID_map = {}
+		for aabb in rid_references[group_idx].multimesh_RID_map:
+			RenderingServer.free_rid(rid_references[group_idx].multimesh_RID_map[aabb])
+		rid_references[group_idx].multimesh_RID_map = {}

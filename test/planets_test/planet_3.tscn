@@ -2,8 +2,6 @@
 
 [ext_resource type="Material" uid="uid://c1kohdpddpx58" path="res://test/assets/materials/grid_mat.tres" id="1_eltyt"]
 [ext_resource type="Script" uid="uid://be4lu3ug8donp" path="res://addons/mm_plus_editor/nodes/mm_plus_3d.gd" id="2_a5hro"]
-[ext_resource type="Script" uid="uid://ntw5ubccc2qm" path="res://addons/mm_plus_editor/resources/mm_plus_data.gd" id="3_74my2"]
-[ext_resource type="Resource" uid="uid://bmo3qxvqs77ek" path="res://mmplus_save_dir/umo3p.res" id="4_eltyt"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_opcri"]
 radius = 14.0
@@ -27,5 +25,4 @@ shape = SubResource("SphereShape3D_8l2c4")
 script = ExtResource("2_a5hro")
 grid_size = 100.0
 previous_grid_size = 100.0
-data = Array[ExtResource("3_74my2")]([ExtResource("4_eltyt")])
 metadata/_custom_type_script = "uid://be4lu3ug8donp"

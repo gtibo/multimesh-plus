@@ -27,5 +27,6 @@ script = ExtResource("1_4vbhn")
 name = &"Cone"
 thumbnail = SubResource("ImageTexture_qrp8v")
 mesh = SubResource("CylinderMesh_h73uu")
+spacing = 1.0
 offset = Vector3(0, 0.25, 0)
 metadata/_custom_type_script = "uid://dre8v2iurryb6"

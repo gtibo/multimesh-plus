@@ -48,6 +48,10 @@ func load_from_list(plus_mesh_list: Array[MMPlusMesh]) -> Array[MMPlusMeshItem]:
 
 	return items
 
+func free_items() -> void:
+	for child in item_holder.get_children():
+		child.queue_free()
+
 func add_item(plus_mesh: MMPlusMesh) -> MMPlusMeshItem:
 	var item: MMPlusMeshItem = ITEM.instantiate()
 	item.item_name = plus_mesh.name

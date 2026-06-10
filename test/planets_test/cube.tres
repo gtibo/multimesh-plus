@@ -31,8 +31,8 @@ image = SubResource("Image_vem47")
 [resource]
 script = ExtResource("1_vem47")
 name = &"cube"
-mesh = SubResource("BoxMesh_ny6ip")
 thumbnail = SubResource("ImageTexture_l8em5")
-spacing = 1.0
+mesh = SubResource("BoxMesh_ny6ip")
 data_mode = 1
+spacing = 1.0
 metadata/_custom_type_script = "uid://dre8v2iurryb6"
