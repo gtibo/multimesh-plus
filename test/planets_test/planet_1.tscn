@@ -2,6 +2,7 @@
 
 [ext_resource type="Material" uid="uid://c1kohdpddpx58" path="res://test/assets/materials/grid_mat.tres" id="1_8l2c4"]
 [ext_resource type="Script" uid="uid://be4lu3ug8donp" path="res://addons/mm_plus_editor/nodes/mm_plus_3d.gd" id="2_qu3as"]
+[ext_resource type="Resource" uid="uid://dwi1yig6sqvmn" path="res://test/planets_test/planet_1_mm_data.res" id="3_0ukbx"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_opcri"]
 radius = 8.0
@@ -22,5 +23,10 @@ mesh = SubResource("SphereMesh_opcri")
 shape = SubResource("SphereShape3D_8l2c4")
 
 [node name="MmPlus3D" type="Node3D" parent="." unique_id=1969295166]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 10, 10)
 script = ExtResource("2_qu3as")
+data_group = ExtResource("3_0ukbx")
+grid_size = 100.0
+previous_grid_size = 100.0
+visibility_range = 200.0
 metadata/_custom_type_script = "uid://be4lu3ug8donp"

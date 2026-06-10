@@ -9,7 +9,7 @@
 
 [sub_resource type="Environment" id="Environment_6yugq"]
 background_mode = 1
-background_color = Color(0.18717614, 0.18717614, 0.18717614, 1)
+background_color = Color(0.07683582, 0.07683582, 0.07683582, 1)
 ambient_light_source = 2
 ambient_light_color = Color(0.5251013, 0.5251013, 0.5251013, 1)
 tonemap_mode = 2
@@ -53,26 +53,26 @@ shadow_enabled = true
 environment = SubResource("Environment_6yugq")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=905834925]
-anchors_preset = 8
+anchors_preset = 7
 anchor_left = 0.5
-anchor_top = 0.5
+anchor_top = 1.0
 anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -122.0
-offset_top = 97.0
-offset_right = 122.0
-offset_bottom = 256.0
+anchor_bottom = 1.0
+offset_left = -81.5
+offset_top = -126.0
+offset_right = 81.5
+offset_bottom = -32.0
 grow_horizontal = 2
-grow_vertical = 2
+grow_vertical = 0
 
 [node name="Label" type="Label" parent="VBoxContainer" unique_id=1351393223]
 layout_mode = 2
-theme_override_font_sizes/font_size = 48
+theme_override_font_sizes/font_size = 32
 text = "Draw Calls"
 horizontal_alignment = 1
 
 [node name="MonitorLabel" type="Label" parent="VBoxContainer" unique_id=1576142404]
 layout_mode = 2
-theme_override_font_sizes/font_size = 48
+theme_override_font_sizes/font_size = 32
 horizontal_alignment = 1
 script = ExtResource("5_4cbb5")

@@ -6,7 +6,7 @@
 [sub_resource type="CylinderMesh" id="CylinderMesh_h73uu"]
 material = ExtResource("1_clqdm")
 top_radius = 0.0
-bottom_radius = 0.2
+bottom_radius = 0.4
 height = 0.5
 radial_segments = 8
 

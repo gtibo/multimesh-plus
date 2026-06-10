@@ -5,6 +5,10 @@
 
 [sub_resource type="SphereMesh" id="SphereMesh_pwsyj"]
 material = ExtResource("1_ai63p")
+radius = 0.4
+height = 0.8
+radial_segments = 32
+rings = 16
 
 [sub_resource type="Image" id="Image_ai63p"]
 data = {
@@ -24,4 +28,4 @@ name = &"Sphere"
 thumbnail = SubResource("ImageTexture_pwsyj")
 mesh = SubResource("SphereMesh_pwsyj")
 spacing = 1.0
-offset = Vector3(0, 0.5, 0)
+offset = Vector3(0, 0.4, 0)
