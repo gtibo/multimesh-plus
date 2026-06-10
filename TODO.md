@@ -66,11 +66,7 @@ By default, MMgrid will partition the space into a grid with cells that are 50 i
 
 - [x] Save resource on disk (limit owner scene file size)
 
-### Important
-
-- [ ] Custom vertex color / custom data option.
-
-Currently, the plugin expect all multimesh to use the color option (storing 16 floats per instance by default in the buffer), but we should be able to switch between, transform only, transform + vertex color, and transform + vertex color + custom data.
+- [x] Custom vertex color / custom data option.
 
 ### Nice to have
 
