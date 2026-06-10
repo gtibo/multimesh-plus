@@ -18,17 +18,17 @@ Tips:
 - `MMPlusMesh` resources can be saved and used in multiple `MMPlus3D` nodes.
 - `MMPlusDataGroup` holds all the buffer information. For a low amount of placed items, it's fine to keep it embedded in the scene, but you can save these resources in `.res` format to save space if needed.
 
-### Resources
+### Resources
 
 MM+ uses multiple custom resources and objects internally, but a few are actually meant to be used directly.
 
-#### MMPlusMesh
+#### MMPlusMesh
 
 `MMPlusMesh` refers to the visual instance that you can place, as well as the rules governing its placement.
 
 These resources can be dragged and dropped into the `items` section when selecting an `MMPlus3D` node.
 
-#### MMPlusDataGroup
+#### MMPlusDataGroup
 
 `MMPlusDataGroup` contains all the buffers of your placed items. You must define one in the inspector when selecting an `MMPlus3D` to edit and store anything. You can keep this resource embedded in a scene or save it as a `.tres` or `.res` external resource.
 
