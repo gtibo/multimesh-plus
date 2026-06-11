@@ -9,9 +9,9 @@ The aim of this project is to explore minimal editing functionality for the `Mul
 ### MMPlus3D node
 
 To use the plugin:
-    1. Add a `MMPlus3D` node in your scene.
-    2. Create a `MMPlusDataGroup` in the inspector.
-    3. Populate the `items` section with `MMPlusMesh` resources.
+1. Add a `MMPlus3D` node in your scene.
+2. Create a `MMPlusDataGroup` in the inspector.
+3. Populate the `items` section with `MMPlusMesh` resources.
 
 Tips:
 
@@ -52,6 +52,7 @@ Use `left click + CTRL` to restore to base scale.
 #### Color Mode
 
 Use `left click` to apply the selected color to items, and use the randomize toggle to randomize the applied color.
+ℹ️ Only `MMPlusMesh with `DataMode` set to `Transform and Vertex Color` can store color data and be affected by the color mode.
 
 ### Shortcuts
 
