@@ -1,4 +1,4 @@
-![Project screenshot](./thumbnail.jpg)
+![Project screenshot](./icon.svg)
 
 # Multimesh +
 
