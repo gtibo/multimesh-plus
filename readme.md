@@ -52,7 +52,8 @@ Use `left click + CTRL` to restore to base scale.
 #### Color Mode
 
 Use `left click` to apply the selected color to items, and use the randomize toggle to randomize the applied color.
-ℹ️ Only `MMPlusMesh with `DataMode` set to `Transform and Vertex Color` can store color data and be affected by the color mode.
+
+ℹ️ Only `MMPlusMesh` with `DataMode` set to `Transform and Vertex Color` can store color data and be affected by the color mode.
 
 ### Shortcuts
 
