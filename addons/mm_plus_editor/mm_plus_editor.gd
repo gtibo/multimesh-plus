@@ -33,8 +33,6 @@ const BRUSH_SCROLL_THRESHOLD : float = 2.0    # Switch from fine to macro
 # Track 'S' key for brush size shortcut (Shift + S + Scroll)
 var _is_s_key_pressed : bool = false
 
-var active_layers : Array[bool] = []
-
 var main_tool_bar : VBoxContainer = null
 var color_tool_bar : HBoxContainer = null
 var color_picker : ColorPickerButton = null
@@ -261,7 +259,7 @@ func _set_all_items_toggled(toggled: bool) -> void:
 	items.assign(items_list.item_holder.get_children())
 	for idx in item_count:
 		items[idx].check_box.set_pressed_no_signal(toggled)
-		active_layers[idx] = toggled
+		selected_node.data_group.active_groups[idx] = toggled
 
 func _on_request_add_item(plus_mesh: MMPlusMesh) -> void:
 	if selected_node.data_group == null: 
@@ -416,6 +414,11 @@ func _on_buffer_resize(group_idx: int) -> void:
 
 # Reinit all the plugin on selected node data change, I'm too lazy to make something better right now
 func _load_selected_node_data() -> void:
+
+	if selected_node.data_group.active_groups.size() != selected_node.data_group.groups.size():
+		selected_node.data_group.active_groups.resize(selected_node.data_group.groups.size())
+		selected_node.data_group.active_groups.fill(true)
+
 	grid_size_spinbox.value = selected_node.grid_size
 	visibility_range_spinbox.value = selected_node.visibility_range
 	data_group_list = []
@@ -448,13 +451,10 @@ func _load_selected_node_data() -> void:
 		_update_selected_node_buffers()
 		selected_node.previous_grid_size = selected_node.grid_size
 
-	_rebuild_layers_ui()
+	_rebuild_active_layers()
 
-func _rebuild_layers_ui() -> void:
+func _rebuild_active_layers() -> void:
 	var item_count: int = selected_node.data_group.groups.size()
-	active_layers = []
-	active_layers.resize(item_count)
-	active_layers.fill(true)
 
 	var mesh_list: Array[MMPlusMesh] = []
 	mesh_list.assign(selected_node.data_group.groups.map(func(mmplus_data: MMPlusData): return mmplus_data.mesh_data))
@@ -462,9 +462,9 @@ func _rebuild_layers_ui() -> void:
 	var items: Array[MMPlusMeshItem] = items_list.load_from_list(mesh_list)
 	# Connect active layers to item toggles
 	for idx in item_count:
-		items[idx].check_box.set_pressed_no_signal(active_layers[idx])
+		items[idx].check_box.set_pressed_no_signal(selected_node.data_group.active_groups[idx])
 		items[idx].check_box.toggled.connect(func(toggled : bool) -> void:
-			active_layers[idx] = toggled
+			selected_node.data_group.active_groups[idx] = toggled
 			)
 
 func _get_data_group_clone() -> Array[MMGroup]:
@@ -538,7 +538,7 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 		# Erase - uses brush_size directly since grid stores base positions (without offset)
 		# This creates intuitive cylinder-shaped erase behavior
 		for data_group_idx in data_group_list.size():
-			if active_layers[data_group_idx] == false: continue
+			if selected_node.data_group.active_groups[data_group_idx] == false: continue
 			var data_group : MMGroup = data_group_list[data_group_idx]
 			data_group.remove_point_in_sphere(t.origin, brush_size)
 	else:
@@ -546,7 +546,7 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 		for i in range(16):
 			var weights : Array = selected_node.data_group.groups.map(func(group: MMPlusData): return group.mesh_data.probability)
 			var data_group_idx : int = rnd.rand_weighted(weights)
-			if active_layers[data_group_idx] == false: continue
+			if selected_node.data_group.active_groups[data_group_idx] == false: continue
 			var mesh_data : MMPlusMesh = selected_node.data_group.groups[data_group_idx].mesh_data
 
 			var circle_offset : Vector2 = _random_in_circle(brush_size)
@@ -606,7 +606,7 @@ func _apply_scale_mode(event : InputEventMouse, t : Transform3D) -> void:
 
 	# Scale uses brush_size directly since grid stores base positions (without offset)
 	for data_group_idx in data_group_list.size():
-		if active_layers[data_group_idx] == false: continue
+		if selected_node.data_group.active_groups[data_group_idx] == false: continue
 		var data_group : MMGroup = data_group_list[data_group_idx]
 
 		# Query grid using brush_size - grid has logical positions
@@ -629,7 +629,7 @@ func _apply_color_mode(t : Transform3D) -> void:
 	var brush_size : float = brush_size_map[current_mode]
 	# Colorize uses brush_size directly since grid stores base positions (without offset)
 	for data_group_idx in data_group_list.size():
-		if active_layers[data_group_idx] == false: continue
+		if selected_node.data_group.active_groups[data_group_idx] == false: continue
 
 		var data_mode : MMDataMode.Mode = selected_node.data_group.groups[data_group_idx].mesh_data.data_mode
 		if data_mode == MMDataMode.Mode.TransformOnly: continue
