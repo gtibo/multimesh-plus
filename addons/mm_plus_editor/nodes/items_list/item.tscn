@@ -36,7 +36,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
 button_pressed = true
-text = "Enabled"
+text = "Active"
 
 [node name="PopupPanel" type="PopupPanel" parent="." unique_id=1805310968]
 unique_name_in_owner = true

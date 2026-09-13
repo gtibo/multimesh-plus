@@ -23,7 +23,7 @@ var brush_size_map : Dictionary[MODE, float] = {
 }
 
 const SPHERE_MAT = preload("./assets/materials/sphere_mat.tres")
-const SECTION_THEME: Theme = preload("./assets/section_theme.tres")
+var SECTION_THEME: Theme = preload("./assets/section_theme.tres").duplicate()
 
 # Brush size scroll shortcut settings
 const BRUSH_SCROLL_STEP_FINE : float = 0.2    # Step size below threshold
@@ -86,6 +86,12 @@ func _toggle_collision_layer(toggled : bool, flag_idx : int) -> void:
 		# Remove collision layer
 		collision_layer &= ~( 1 << (flag_idx) )
 
+func _set_section_theme_color() -> void:
+	var base_color: Color = EditorInterface.get_base_control().get_theme_color("base_color", "Editor")
+	var s_b: StyleBoxFlat = SECTION_THEME.get_stylebox("normal", "Label")
+	s_b.bg_color = base_color.darkened(0.15)
+	SECTION_THEME.set_stylebox("normal", "Label", s_b)
+
 func _create_section(section_name: String) -> Control:
 	var section_label: Label = Label.new()
 	section_label.text = section_name
@@ -94,10 +100,8 @@ func _create_section(section_name: String) -> Control:
 	return section_label
 
 func _init_ui() -> void:
-	var base_color: Color = EditorInterface.get_base_control().get_theme_color("base_color", "Editor")
-	var s_b: StyleBoxFlat = SECTION_THEME.get_stylebox("normal", "Label")
-	s_b.bg_color = base_color.darkened(0.15)
-	SECTION_THEME.set_stylebox("normal", "Label", s_b)
+	EditorInterface.get_base_control().theme_changed.connect(_set_section_theme_color)
+	_set_section_theme_color()
 
 	main_tool_bar = VBoxContainer.new()
 	color_tool_bar = HBoxContainer.new()

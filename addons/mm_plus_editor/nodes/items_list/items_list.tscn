@@ -13,7 +13,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("1_sjdik")
 
-[node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=1117280255]
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1758802069]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -21,7 +21,22 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ItemHolder" type="HFlowContainer" parent="ScrollContainer" unique_id=276181460]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=871632070]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=854863292]
+layout_mode = 2
+text = "Activate All"
+
+[node name="Button2" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=767075099]
+layout_mode = 2
+text = "Deactivate All"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer" unique_id=1117280255]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ItemHolder" type="HFlowContainer" parent="VBoxContainer/ScrollContainer" unique_id=276181460]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
