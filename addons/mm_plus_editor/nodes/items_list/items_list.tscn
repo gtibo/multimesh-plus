@@ -24,11 +24,13 @@ grow_vertical = 2
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=871632070]
 layout_mode = 2
 
-[node name="Button" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=854863292]
+[node name="ActivateAllButton" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=854863292]
+unique_name_in_owner = true
 layout_mode = 2
 text = "Activate All"
 
-[node name="Button2" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=767075099]
+[node name="DeactivateAllButton" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=767075099]
+unique_name_in_owner = true
 layout_mode = 2
 text = "Deactivate All"
 

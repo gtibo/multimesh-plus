@@ -4,6 +4,8 @@ extends Control
 const ITEM = preload("./item.tscn")
 @onready var item_holder: HFlowContainer = %ItemHolder
 @onready var no_items_label: VBoxContainer = %NoItemsLabel
+@onready var activate_all_button: Button = %ActivateAllButton
+@onready var deactivate_all_button: Button = %DeactivateAllButton
 
 signal request_add_item(item: MMPlusMesh)
 signal request_delete_item(idx: int)

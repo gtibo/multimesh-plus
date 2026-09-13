@@ -242,6 +242,8 @@ func _init_ui() -> void:
 	items_list.request_add_item.connect(_on_request_add_item)
 	items_list.request_delete_item.connect(_on_request_delete_item)
 	main_tool_bar.add_child(items_list)
+	items_list.activate_all_button.pressed.connect(_set_all_items_toggled.bind(true))
+	items_list.deactivate_all_button.pressed.connect(_set_all_items_toggled.bind(false))
 
 	# Create preview mesh
 	preview_mesh = MeshInstance3D.new()
@@ -251,6 +253,15 @@ func _init_ui() -> void:
 	preview_mesh.mesh.rings = 16
 	preview_mesh.material_override = SPHERE_MAT
 	preview_mesh.hide()
+
+# Set the toggle state of all the items
+func _set_all_items_toggled(toggled: bool) -> void:
+	var item_count: int = selected_node.data_group.groups.size()
+	var items: Array[MMPlusMeshItem]
+	items.assign(items_list.item_holder.get_children())
+	for idx in item_count:
+		items[idx].check_box.set_pressed_no_signal(toggled)
+		active_layers[idx] = toggled
 
 func _on_request_add_item(plus_mesh: MMPlusMesh) -> void:
 	if selected_node.data_group == null: 
@@ -402,7 +413,6 @@ func _on_buffer_resize(group_idx: int) -> void:
 	var data_group : MMPlusData = selected_node.data_group.groups[group_idx]
 	var multimesh_data : Dictionary[AABB, MultiMesh] = selected_node.data_group.groups[group_idx].multimesh_data_map
 	data_group_list[group_idx].setup(multimesh_data, selected_node.grid_size, data_group.mesh_data.data_mode)
-
 
 # Reinit all the plugin on selected node data change, I'm too lazy to make something better right now
 func _load_selected_node_data() -> void:
