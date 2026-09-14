@@ -10,7 +10,7 @@ position = Vector2(300, 300)
 
 [node name="Timer" type="Timer" parent="." unique_id=1462163105]
 unique_name_in_owner = true
-wait_time = 3.0
+wait_time = 0.5
 autostart = true
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=770498440]
