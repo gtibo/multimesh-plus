@@ -52,6 +52,14 @@ func _on_mesh_data_changed(group: MMPlusData):
 	for aabb in group.multimesh_data_map.keys():
 		buffer_map[aabb] = group.multimesh_data_map[aabb].buffer
 
+	var material_rid: RID = group.mesh_data.material_override.get_rid() if group.mesh_data.material_override else RID()
+	var data_group : MMRidRef = rid_references[group_idx]
+	for aabb in data_group.visual_instance_RID_map:
+		RenderingServer.instance_geometry_set_material_override(
+			data_group.visual_instance_RID_map[aabb],
+			material_rid
+			)
+
 	_update_buffer(group_idx, buffer_map)
 
 func update_visibility_range(range: float):
@@ -146,6 +154,8 @@ func _add_visual_instance(group_idx : int, aabb : AABB) -> void:
 	RenderingServer.instance_geometry_set_cast_shadows_setting(i_rid, mesh_data.cast_shadow)
 	RenderingServer.instance_geometry_set_visibility_range(i_rid, 0.0, visibility_range + grid_size / 2.0, 0.0, 0.0, RenderingServer.VISIBILITY_RANGE_FADE_DISABLED)
 	RenderingServer.instance_set_visible(i_rid, visible)
+	var material_rid: RID = mesh_data.material_override.get_rid() if mesh_data.material_override else RID()
+	RenderingServer.instance_geometry_set_material_override(i_rid, material_rid)
 	rid_references[group_idx].multimesh_RID_map[aabb] = m_rid
 	rid_references[group_idx].visual_instance_RID_map[aabb] = i_rid
 

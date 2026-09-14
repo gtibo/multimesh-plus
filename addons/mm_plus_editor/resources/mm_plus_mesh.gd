@@ -9,6 +9,7 @@ extends Resource
 @export var mesh : Mesh : set = _set_mesh
 @export var cast_shadow : RenderingServer.ShadowCastingSetting = RenderingServer.ShadowCastingSetting.SHADOW_CASTING_SETTING_ON : set = _set_shadow_cast
 @export var data_mode : MMDataMode.Mode = MMDataMode.Mode.TransformOnly : set = _set_data_mode
+@export var material_override: Material = null : set = _set_material_override
 @export_category("Distribution")
 ## Minimum space between this instance and another to avoid any overlap.
 @export var spacing : float = 0.5 : set = _set_spacing
@@ -17,6 +18,7 @@ extends Resource
 @export_range(0.0, 1.0, 0.01) var probability : float = 1.0
 ## Offset applied to the transformation of the instance during placement.
 @export var offset : Vector3 = Vector3.ZERO : set = _set_offset
+## Align the instance with the normal of the surface onto which it is projected.
 @export var align_on_surface_normal : bool = true
 @export var rotation_mode : RotationMode = RotationMode.NONE
 ## Base scale of the instance used during placement.
@@ -37,7 +39,13 @@ enum RotationMode {
 func update_thumbnail() -> void:
 	if Engine.is_editor_hint():
 		var editor_interface = Engine.get_singleton("EditorInterface") # Avoids explicitly using the Singleton
-		thumbnail = editor_interface.make_mesh_previews([mesh], 64)[0]
+
+		var mesh_clone: Mesh = mesh.duplicate()
+		if material_override != null:
+			for idx in mesh_clone.get_surface_count():
+				mesh_clone.surface_set_material(idx, material_override)
+	
+		thumbnail = editor_interface.make_mesh_previews([mesh_clone], 64)[0]
 
 func _set_name(new_name : StringName) -> void:
 	name = new_name
@@ -70,4 +78,8 @@ func _set_offset(new_offset: Vector3) -> void:
 
 func _set_data_mode(new_data_mode: MMDataMode.Mode) -> void:
 	data_mode = new_data_mode
+	emit_changed()
+
+func _set_material_override(material: Material) -> void:
+	material_override = material
 	emit_changed()

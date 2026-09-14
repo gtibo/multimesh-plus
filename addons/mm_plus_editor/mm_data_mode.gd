@@ -1,7 +1,9 @@
 class_name MMDataMode
 
 enum Mode {
+	## Stores 12 integer values: for position, rotation, and scale.
 	TransformOnly,
+	## Stores 12 integer values: for position, rotation, scale and color.
 	TransformAndVertexColor
 }
 
