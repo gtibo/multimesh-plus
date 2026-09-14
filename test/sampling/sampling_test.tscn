@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://crn0t2vv8puof"]
+
+[ext_resource type="Script" uid="uid://bxmkq1t8wbfbe" path="res://test/sampling/sampling_test.gd" id="1_8j2lb"]
+
+[node name="SamplingTest" type="Node2D" unique_id=1689391248]
+script = ExtResource("1_8j2lb")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1572576585]
+position = Vector2(300, 300)
+
+[node name="Timer" type="Timer" parent="." unique_id=1462163105]
+unique_name_in_owner = true
+wait_time = 3.0
+autostart = true
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=770498440]
+layer = -1
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer" unique_id=434067637]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
