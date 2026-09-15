@@ -10,7 +10,7 @@ var cells_id: Array[PackedInt32Array] = []
 var min_radius: float = 0.0
 var max_radius: float = 0.0
 var zone_size: float = 0.0
-var max_compute: int = 128
+var max_compute: int = 64
 
 var red_cell_test: int = 0
 
@@ -22,7 +22,7 @@ func get_points_in_circle(_min_radius: float, _max_radius: float, _zone_size: fl
 	min_radius = _min_radius
 	max_radius = _max_radius
 	zone_size = _zone_size
-	cell_size = min_radius / sqrt(2)
+	cell_size = (min_radius / sqrt(2))
 	cells_row_count = ceil(zone_size / cell_size)
 	cells_count = pow(cells_row_count, 2)
 	cells_id.resize(cells_count)
@@ -47,9 +47,8 @@ func get_points_in_circle(_min_radius: float, _max_radius: float, _zone_size: fl
 			var is_valid: bool = _add_point(point)
 			if is_valid: valid_count += 1
 
-		#if valid_count == 0:
-			#active_list.erase(picked_id)
-		active_list.erase(picked_id)
+		if valid_count == 0:
+			active_list.erase(picked_id)
 		
 		if compute_count >= max_compute: break
 		compute_count += 1
@@ -59,7 +58,8 @@ func get_points_in_circle(_min_radius: float, _max_radius: float, _zone_size: fl
 func _get_candidate_points(point: Dictionary) -> Array[Dictionary]:
 	var candidates: Array[Dictionary] = []
 	for i in range(8):
-		var pos: Vector2 = point.position + (Vector2.from_angle(randf() * TAU) * randf_range(point.radius , max_radius * 2.0))
+		var new_radius: float = randf_range(min_radius, max_radius)
+		var pos: Vector2 = point.position + (Vector2.from_angle(randf() * TAU) * randf_range(point.radius + new_radius, point.radius + max_radius * 2.0))
 		if (pos - Vector2.ONE * zone_size / 2.0).length() > zone_size / 2.0: continue
 		if pos.x < 0.0 || pos.x > zone_size: continue
 		if pos.y < 0.0 || pos.y > zone_size: continue
