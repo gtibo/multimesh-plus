@@ -560,6 +560,9 @@ func _check_editing_modes(viewport_camera, event) -> void:
 	previous_target_transform = target_transform
 
 func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
+	# Do nothing if all groups are inactive
+	if selected_node.data_group.active_groups.all(func(is_active: bool): return is_active == false):
+		return
 	var brush_size : float = brush_size_map[current_mode]
 	if event.shift_pressed:
 		# Erase - uses brush_size directly since grid stores base positions (without offset)
@@ -572,8 +575,12 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 		# Paint
 		for i in range(clamp(brush_density_box.value, 1, 256)):
 			var weights : Array = selected_node.data_group.groups.map(func(group: MMPlusData): return group.mesh_data.probability)
+
+			for idx in weights.size():
+				if selected_node.data_group.active_groups[idx] == false:
+					weights[idx] = 0.0
+
 			var data_group_idx : int = rnd.rand_weighted(weights)
-			if selected_node.data_group.active_groups[data_group_idx] == false: continue
 			var mesh_data : MMPlusMesh = selected_node.data_group.groups[data_group_idx].mesh_data
 
 			var circle_offset : Vector2 = _random_in_circle(brush_size)
