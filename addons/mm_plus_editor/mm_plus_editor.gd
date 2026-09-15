@@ -34,11 +34,13 @@ const BRUSH_SCROLL_THRESHOLD : float = 2.0    # Switch from fine to macro
 var _is_s_key_pressed : bool = false
 
 var main_tool_bar : VBoxContainer = null
+var paint_tool_bar : HBoxContainer = null
 var color_tool_bar : HBoxContainer = null
 var color_picker : ColorPickerButton = null
 var button_group : ButtonGroup = null
 var preview_mesh : MeshInstance3D = null
 var brush_size_box : SpinBox = null
+var brush_density_box: SpinBox = null
 var randomize_color_button : Button = null
 var items_list: Control = null
 var collision_layer : int = 1
@@ -103,8 +105,10 @@ func _init_ui() -> void:
 
 	main_tool_bar = VBoxContainer.new()
 	color_tool_bar = HBoxContainer.new()
+	paint_tool_bar = HBoxContainer.new()
 	main_tool_bar.hide()
 	color_tool_bar.hide()
+	paint_tool_bar.hide()
 	add_control_to_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_SIDE_RIGHT, main_tool_bar)
 
 	var gui = EditorInterface.get_base_control()
@@ -145,6 +149,28 @@ func _init_ui() -> void:
 	brush_size_container.add_child(brush_size_box)
 
 	main_tool_bar.add_child(brush_size_container)
+
+	# Paint panel
+
+	var brush_dentisty_label: Label = Label.new()
+	brush_dentisty_label.text = "Brush Density"
+	brush_dentisty_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	
+	brush_density_box = SpinBox.new()
+	brush_density_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	brush_density_box.value = 16
+	brush_density_box.min_value = 1
+	brush_density_box.max_value = 256
+	brush_density_box.step = 1
+
+	var paint_resolution_container: HBoxContainer = HBoxContainer.new()
+	paint_resolution_container.add_child(brush_dentisty_label)
+	paint_resolution_container.add_child(brush_density_box)
+	paint_resolution_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	paint_tool_bar.add_child(paint_resolution_container)
+
+	main_tool_bar.add_child(paint_tool_bar)
 
 	# Color panel
 	color_picker = ColorPickerButton.new()
@@ -313,6 +339,7 @@ func _set_current_mode(mode : MODE) -> void:
 	else:
 		preview_mesh.visible = false
 
+	paint_tool_bar.visible = current_mode == MODE.PAINT
 	color_tool_bar.visible = current_mode == MODE.COLOR
 
 func _update_brush_preview_size() -> void:
@@ -543,7 +570,7 @@ func _apply_paint_mode(event : InputEventMouse, t : Transform3D) -> void:
 			data_group.remove_point_in_sphere(t.origin, brush_size)
 	else:
 		# Paint
-		for i in range(16):
+		for i in range(clamp(brush_density_box.value, 1, 256)):
 			var weights : Array = selected_node.data_group.groups.map(func(group: MMPlusData): return group.mesh_data.probability)
 			var data_group_idx : int = rnd.rand_weighted(weights)
 			if selected_node.data_group.active_groups[data_group_idx] == false: continue
