@@ -2,7 +2,9 @@
 
 # Multimesh +
 
-The aim of this project is to explore minimal editing functionality for the `MultiMeshInstance3D` node. Please note that this plugin is still in the very early stages of development. As such, I cannot guarantee that it will work properly on your project.
+**MM+** offers minimal editing functionality for the `MultiMeshInstance3D` node. Place, scale, and paint MultiMesh instances, and automatically separate them into chunks for simple optimization.
+
+*Please note that this plugin is still in the very early stages of development. As such, I cannot guarantee that it will work properly in your project.*
 
 ## Features
 
