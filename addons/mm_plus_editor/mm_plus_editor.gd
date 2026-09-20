@@ -43,9 +43,9 @@ var brush_size_box : SpinBox = null
 var brush_density_box: SpinBox = null
 var randomize_color_button : Button = null
 var items_list: Control = null
-var collision_layer : int = 1
 var grid_size_spinbox : SpinBox = null
 var visibility_range_spinbox : SpinBox = null
+var collision_layer_ui: VBoxContainer = preload("./components/collision_layers/collision_layers.gd").new()
 
 func _on_set_visibility_button_pressed(new_range_size: float) -> void:
 	if selected_node == null: return
@@ -77,14 +77,6 @@ func _set_grid_size(new_grid_size : float) -> void:
 	undo_redo.add_do_method(self, "_load_selected_node_data")
 	undo_redo.add_undo_method(self, "_load_selected_node_data")
 	undo_redo.commit_action()
-
-func _toggle_collision_layer(toggled : bool, flag_idx : int) -> void:
-	if toggled:
-		# Add collision layer
-		collision_layer |= 1 << (flag_idx)
-	else:
-		# Remove collision layer
-		collision_layer &= ~( 1 << (flag_idx) )
 
 func _set_section_theme_color() -> void:
 	var base_color: Color = EditorInterface.get_base_control().get_theme_color("base_color", "Editor")
@@ -155,7 +147,9 @@ func _init_ui() -> void:
 	var brush_dentisty_label: Label = Label.new()
 	brush_dentisty_label.text = "Brush Density"
 	brush_dentisty_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	
+	brush_dentisty_label.tooltip_text = "How many iterations will the paint mode take to project onto the surface with one click."
+	brush_dentisty_label.mouse_filter = Control.MOUSE_FILTER_STOP
+
 	brush_density_box = SpinBox.new()
 	brush_density_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	brush_density_box.value = 16
@@ -243,22 +237,7 @@ func _init_ui() -> void:
 	)
 
 	# Physics layer setting
-
-	var collision_layer_container : GridContainer = GridContainer.new()
-	collision_layer_container.set("theme_override_constants/h_separation", 1)
-	collision_layer_container.set("theme_override_constants/v_separation", 1)
-	collision_layer_container.columns = 16
-	collision_layer_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	settings_container.add_child(collision_layer_container)
-
-	for i in 32:
-		var layer_btn : Button = Button.new()
-		collision_layer_container.add_child(layer_btn)
-		layer_btn.text = str(i + 1)
-		layer_btn.toggle_mode = true
-		if i == 0: layer_btn.set_pressed(true)
-		layer_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		layer_btn.toggled.connect(_toggle_collision_layer.bind(i))
+	settings_container.add_child(collision_layer_ui)
 
 	# Items section
 	main_tool_bar.add_child(_create_section("Items"))
@@ -707,6 +686,6 @@ func _get_basis_from_normal(normal : Vector3) -> Basis:
 func _ray_cast(start : Vector3, end : Vector3) -> Dictionary:
 	if selected_node == null: return {}
 	var space_state : PhysicsDirectSpaceState3D = selected_node.get_world_3d().direct_space_state
-	var query = PhysicsRayQueryParameters3D.create(start, end, collision_layer)
+	var query = PhysicsRayQueryParameters3D.create(start, end, collision_layer_ui.collision_layer)
 	var ray_cast_result = space_state.intersect_ray(query)
 	return ray_cast_result

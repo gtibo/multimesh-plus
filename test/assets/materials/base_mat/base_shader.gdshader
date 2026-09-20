@@ -1,6 +1,7 @@
 shader_type spatial;
 
 uniform vec3 albedo : source_color;
+uniform bool use_vertex_color;
 
 group_uniforms object_fade;
 uniform float distance_fade_min : hint_range(0.0, 4096.0, 0.01);
@@ -9,7 +10,11 @@ uniform float distance_fade_max : hint_range(0.0, 4096.0, 0.01);
 
 void fragment() {
 
-	ALBEDO = albedo;
+	if(use_vertex_color){
+		ALBEDO = albedo * COLOR.rgb;
+	}else{
+		ALBEDO = albedo;
+	}
 	ROUGHNESS = 0.6;
 
 	{

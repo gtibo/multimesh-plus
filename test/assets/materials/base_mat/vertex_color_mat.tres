@@ -1,0 +1,11 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://l7j6p5yraa3c"]
+
+[ext_resource type="Shader" uid="uid://cr57l8q44hnjw" path="res://test/assets/materials/base_mat/base_shader.gdshader" id="1_mbkcr"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_mbkcr")
+shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/use_vertex_color = true
+shader_parameter/distance_fade_min = 199.9999955296
+shader_parameter/distance_fade_max = 159.99999642368

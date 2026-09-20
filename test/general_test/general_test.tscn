@@ -40,6 +40,7 @@ material_override = ExtResource("4_1flo6")
 mesh = ExtResource("9_ctnn2")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=1968106299]
+visible = false
 shape = SubResource("ConcavePolygonShape3D_ctnn2")
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=1096268888]
