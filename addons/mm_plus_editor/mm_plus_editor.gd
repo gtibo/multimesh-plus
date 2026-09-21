@@ -1,4 +1,5 @@
 @tool
+class_name MMPlusEditorPlugin
 extends EditorPlugin
 
 var selected_node : MmPlus3D
@@ -11,11 +12,6 @@ var rnd : RandomNumberGenerator = RandomNumberGenerator.new()
 
 enum MODE {NONE, PAINT, SCALE, COLOR}
 var current_mode : MODE = MODE.NONE : set = _set_current_mode
-const btn_mode_map : Dictionary[MODE, Dictionary] = {
-	MODE.PAINT: {"title": "Paint", "icon": "Paint"},
-	MODE.SCALE: {"title": "Scale", "icon": "ToolScale"},
-	MODE.COLOR: {"title": "Colorize", "icon": "Bucket"},
-}
 var brush_size_map : Dictionary[MODE, float] = {
 	MODE.PAINT: 1.0,
 	MODE.SCALE: 1.0,
@@ -36,7 +32,6 @@ var main_tool_bar : VBoxContainer = null
 var paint_tool_bar : HBoxContainer = null
 var color_tool_bar : HBoxContainer = null
 var color_picker : ColorPickerButton = null
-var button_group : ButtonGroup = null
 var preview_mesh : MeshInstance3D = null
 var brush_size_box : SpinBox = null
 var brush_density_box: SpinBox = null
@@ -46,6 +41,7 @@ var grid_size_spinbox : SpinBox = null
 var visibility_range_spinbox : SpinBox = null
 var collision_layer_ui: VBoxContainer = preload("./components/collision_layers/collision_layers.gd").new()
 const section_ui = preload("./components/section/section.gd")
+const mode_button_ui = preload("./components/mode_buttons/mode_buttons.gd")
 
 func _on_set_visibility_button_pressed(new_range_size: float) -> void:
 	if selected_node == null: return
@@ -91,22 +87,9 @@ func _init_ui() -> void:
 
 	# Create mode buttons
 	main_tool_bar.add_child(section_ui.new("Edit Mode"))
-	var mode_buttons_container: HBoxContainer = HBoxContainer.new()
-	main_tool_bar.add_child(mode_buttons_container)
-	button_group = ButtonGroup.new()
-
-	for btn_id in btn_mode_map:
-		var btn : Button = Button.new()
-		btn.text = btn_mode_map[btn_id].title
-		btn.icon = gui.get_theme_icon(btn_mode_map[btn_id].icon, "EditorIcons")
-		btn.button_group = button_group
-		btn.toggle_mode = true
-		btn.set_meta("ID", btn_id)
-		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		mode_buttons_container.add_child(btn)
-
-	button_group.allow_unpress = true
-	button_group.pressed.connect(_on_button_group_press)
+	var mode_button: HBoxContainer = mode_button_ui.new()
+	main_tool_bar.add_child(mode_button)
+	mode_button.button_group.pressed.connect(_on_button_group_press.bind(mode_button.button_group))
 
 	# Brush Size UI
 	var brush_size_label: Label = Label.new()
@@ -362,7 +345,7 @@ func _apply_brush_size_scroll(event : InputEventMouseButton) -> void:
 	# Update via SpinBox to trigger _on_brush_size_value_changed and keep UI in sync
 	brush_size_box.value = new_size
 
-func _on_button_group_press(_pressed_button : BaseButton):
+func _on_button_group_press(_pressed_button : BaseButton, button_group: ButtonGroup):
 	var btn : BaseButton = button_group.get_pressed_button()
 	current_mode = MODE.NONE if btn == null else btn.get_meta("ID", 0)
 	selected_node.set_meta("_edit_lock_", null if btn == null else true)
