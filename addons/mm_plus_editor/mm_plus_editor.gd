@@ -23,7 +23,6 @@ var brush_size_map : Dictionary[MODE, float] = {
 }
 
 const SPHERE_MAT = preload("./assets/materials/sphere_mat.tres")
-var SECTION_THEME: Theme = preload("./assets/section_theme.tres").duplicate()
 
 # Brush size scroll shortcut settings
 const BRUSH_SCROLL_STEP_FINE : float = 0.2    # Step size below threshold
@@ -46,6 +45,7 @@ var items_list: Control = null
 var grid_size_spinbox : SpinBox = null
 var visibility_range_spinbox : SpinBox = null
 var collision_layer_ui: VBoxContainer = preload("./components/collision_layers/collision_layers.gd").new()
+const section_ui = preload("./components/section/section.gd")
 
 func _on_set_visibility_button_pressed(new_range_size: float) -> void:
 	if selected_node == null: return
@@ -78,23 +78,7 @@ func _set_grid_size(new_grid_size : float) -> void:
 	undo_redo.add_undo_method(self, "_load_selected_node_data")
 	undo_redo.commit_action()
 
-func _set_section_theme_color() -> void:
-	var base_color: Color = EditorInterface.get_base_control().get_theme_color("base_color", "Editor")
-	var s_b: StyleBoxFlat = SECTION_THEME.get_stylebox("normal", "Label")
-	s_b.bg_color = base_color.darkened(0.15)
-	SECTION_THEME.set_stylebox("normal", "Label", s_b)
-
-func _create_section(section_name: String) -> Control:
-	var section_label: Label = Label.new()
-	section_label.text = section_name
-	section_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	section_label.theme = SECTION_THEME
-	return section_label
-
 func _init_ui() -> void:
-	EditorInterface.get_base_control().theme_changed.connect(_set_section_theme_color)
-	_set_section_theme_color()
-
 	main_tool_bar = VBoxContainer.new()
 	color_tool_bar = HBoxContainer.new()
 	paint_tool_bar = HBoxContainer.new()
@@ -106,7 +90,7 @@ func _init_ui() -> void:
 	var gui = EditorInterface.get_base_control()
 
 	# Create mode buttons
-	main_tool_bar.add_child(_create_section("Edit Mode"))
+	main_tool_bar.add_child(section_ui.new("Edit Mode"))
 	var mode_buttons_container: HBoxContainer = HBoxContainer.new()
 	main_tool_bar.add_child(mode_buttons_container)
 	button_group = ButtonGroup.new()
@@ -180,7 +164,7 @@ func _init_ui() -> void:
 	main_tool_bar.add_child(color_tool_bar)
 
 	# Settings Section
-	main_tool_bar.add_child(_create_section("General Settings"))
+	main_tool_bar.add_child(section_ui.new("General Settings"))
 	var settings_container = VBoxContainer.new()
 	main_tool_bar.add_child(settings_container)
 
@@ -240,7 +224,7 @@ func _init_ui() -> void:
 	settings_container.add_child(collision_layer_ui)
 
 	# Items section
-	main_tool_bar.add_child(_create_section("Items"))
+	main_tool_bar.add_child(section_ui.new("Items"))
 	items_list = preload("./nodes/items_list/items_list.tscn").instantiate()
 	items_list.request_add_item.connect(_on_request_add_item)
 	items_list.request_delete_item.connect(_on_request_delete_item)
