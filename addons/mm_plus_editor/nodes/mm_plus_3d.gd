@@ -80,7 +80,7 @@ func _update_visual_instances_visibility() -> void:
 	for group_idx in rid_references.size():
 		var data_group : MMRidRef = rid_references[group_idx]
 		for aabb in data_group.visual_instance_RID_map:
-			RenderingServer.instance_set_visible(data_group.visual_instance_RID_map[aabb], visible)
+			RenderingServer.instance_set_visible(data_group.visual_instance_RID_map[aabb], is_visible_in_tree())
 
 func _update_visual_instances_transform() -> void:
 	for group_idx in rid_references.size():
@@ -153,7 +153,7 @@ func _add_visual_instance(group_idx : int, aabb : AABB) -> void:
 	RenderingServer.multimesh_set_mesh(m_rid, mesh.get_rid())
 	RenderingServer.instance_geometry_set_cast_shadows_setting(i_rid, mesh_data.cast_shadow)
 	RenderingServer.instance_geometry_set_visibility_range(i_rid, 0.0, visibility_range + grid_size / 2.0, 0.0, 0.0, RenderingServer.VISIBILITY_RANGE_FADE_DISABLED)
-	RenderingServer.instance_set_visible(i_rid, visible)
+	RenderingServer.instance_set_visible(i_rid, is_visible_in_tree())
 	var material_rid: RID = mesh_data.material_override.get_rid() if mesh_data.material_override else RID()
 	RenderingServer.instance_geometry_set_material_override(i_rid, material_rid)
 	rid_references[group_idx].multimesh_RID_map[aabb] = m_rid
