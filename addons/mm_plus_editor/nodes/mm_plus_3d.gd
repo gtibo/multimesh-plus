@@ -185,7 +185,7 @@ func check_missmatch(data_group_list : Array[MMGroup]):
 		var local_data : Dictionary[AABB, MultiMesh] = data_group.groups[group_idx].multimesh_data_map
 		var external_data : Dictionary[AABB, PackedFloat32Array] = data_group_list[group_idx].buffer_map
 
-		for aabb in local_data:
+		for aabb in local_data.keys():
 			if !external_data.has(aabb):
 				_remove_buffer(group_idx, aabb)
 
@@ -253,7 +253,7 @@ func _repare_buffer_size_mismatch(buffer : PackedFloat32Array, previous_size: in
 
 			var missing_data: PackedFloat32Array = []
 			missing_data.resize(new_size - previous_size)
-			missing_data.fill(0.0)
+			missing_data.fill(1.0)
 			segment.append_array(missing_data)
 			resized_buffer.append_array(segment)
 
