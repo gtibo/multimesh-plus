@@ -632,16 +632,16 @@ func _add_to_history() -> void:
 	undo_redo.create_action("Update node buffers")
 	undo_redo.add_do_method(self, "_update_selected_node_buffers_history", do_prop)
 	undo_redo.add_undo_method(self, "_update_selected_node_buffers_history", undo_prop)
-	undo_redo.add_do_property(self, "data_group_list", do_prop)
-	undo_redo.add_undo_property(self, "data_group_list", undo_prop)
 	undo_redo.commit_action()
 
 func _update_selected_node_buffers() -> void:
 	selected_node.update_group_buffer(data_group_list)
 
 func _update_selected_node_buffers_history(data : Array[MMGroup]) -> void:
-	selected_node.update_group_buffer(data)
-	selected_node.check_missmatch(data)
+	data_group_list = data
+	data_group_list = _get_data_group_clone()
+	selected_node.update_group_buffer(data_group_list)
+	selected_node.check_missmatch(data_group_list)
 
 func _get_basis_from_normal(normal : Vector3) -> Basis:
 	var basis = Basis.IDENTITY
